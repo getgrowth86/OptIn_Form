@@ -505,13 +505,13 @@ app.post('/api/register-complete', async (req, res) => {
 
     // Register in Webinargeek
     let subscriptionId;
+    
+    // Define cleanPhone outside try block so it's available in catch
+    let cleanPhone = phone.replace(/^\+/, '').replace(/^0+/, '');
+    
     try {
       console.log('📍 Registering in Webinargeek...');
       console.log('Broadcast ID:', broadcastId);
-      
-      // Try different phone formats
-      // Remove leading + and 0s for cleaner format
-      let cleanPhone = phone.replace(/^\+/, '').replace(/^0+/, '');
       
       // Build subscription payload - TRY WITHOUT COUNTRY FIRST
       const wgPayload = {
