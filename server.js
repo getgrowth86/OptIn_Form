@@ -34,11 +34,23 @@ app.post('/api/register-step1', async (req, res) => {
   try {
     const { email } = req.body;
 
+    console.log('=== STEP 1 DEBUG ===');
+    console.log('Email:', email);
+    console.log('AC_API_URL:', AC_API_URL);
+    console.log('AC_API_KEY exists:', !!AC_API_KEY);
+    console.log('AC_LIST_ID:', AC_LIST_ID);
+
     if (!email) {
       return res.status(400).json({ success: false, message: 'Email required' });
     }
 
+    if (!AC_API_URL || !AC_API_KEY) {
+      console.error('Missing AC credentials!');
+      return res.status(500).json({ success: false, message: 'Server not configured - missing AC credentials' });
+    }
+
     // Create/Update contact in Active Campaign
+    console.log('Creating contact in AC...');
     const acResponse = await axios.post(
       `${AC_API_URL}/api/3/contacts`,
       {
@@ -56,8 +68,10 @@ app.post('/api/register-step1', async (req, res) => {
     );
 
     const contactId = acResponse.data.contact.id;
+    console.log('Contact created:', contactId);
 
     // Add contact to list
+    console.log('Adding to list...');
     await axios.post(
       `${AC_API_URL}/api/3/contactLists`,
       {
@@ -75,27 +89,31 @@ app.post('/api/register-step1', async (req, res) => {
     );
 
     // Add tag
-    await axios.post(
-      `${AC_API_URL}/api/3/contactTags`,
-      {
-        contactTag: {
-          tag: AC_TAG,
-          contact: contactId,
+    if (AC_TAG) {
+      console.log('Adding tag...');
+      await axios.post(
+        `${AC_API_URL}/api/3/contactTags`,
+        {
+          contactTag: {
+            tag: AC_TAG,
+            contact: contactId,
+          },
         },
-      },
-      {
-        headers: {
-          'Api-Token': AC_API_KEY,
-        },
-      }
-    );
+        {
+          headers: {
+            'Api-Token': AC_API_KEY,
+          },
+        }
+      );
+    }
 
+    console.log('✓ Step 1 success');
     res.json({ success: true, contactId });
   } catch (error) {
-    console.error('Step 1 error:', error.response?.data || error.message);
+    console.error('❌ Step 1 error:', error.response?.status, error.response?.data || error.message);
     res.status(500).json({ 
       success: false, 
-      message: error.response?.data?.errors?.[0]?.message || 'Registration failed' 
+      message: error.response?.data?.errors?.[0]?.message || error.message || 'Registration failed'
     });
   }
 });
@@ -107,11 +125,23 @@ app.post('/api/register-complete', async (req, res) => {
   try {
     const { email, firstname, phone, country } = req.body;
 
+    console.log('=== STEP 2 DEBUG ===');
+    console.log('Data:', { email, firstname, phone, country });
+    console.log('WG_API_KEY exists:', !!WG_API_KEY);
+    console.log('WG_WEBINAR_ID:', WG_WEBINAR_ID);
+    console.log('WG_EPISODE_ID:', WG_EPISODE_ID);
+
     if (!email || !firstname || !phone) {
       return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
 
+    if (!WG_API_KEY) {
+      console.error('Missing Webinargeek API key!');
+      return res.status(500).json({ success: false, message: 'Server not configured - missing WG credentials' });
+    }
+
     // Get contact by email in Active Campaign
+    console.log('Searching contact in AC...');
     const acSearchResponse = await axios.get(
       `${AC_API_URL}/api/3/contacts?email=${encodeURIComponent(email)}`,
       {
@@ -124,8 +154,9 @@ app.post('/api/register-complete', async (req, res) => {
     let contactId;
     if (acSearchResponse.data.contacts.length > 0) {
       contactId = acSearchResponse.data.contacts[0].id;
+      console.log('Contact found:', contactId);
     } else {
-      // Create new contact if not found
+      console.log('Contact not found, creating...');
       const createResponse = await axios.post(
         `${AC_API_URL}/api/3/contacts`,
         {
@@ -142,21 +173,17 @@ app.post('/api/register-complete', async (req, res) => {
         }
       );
       contactId = createResponse.data.contact.id;
+      console.log('Contact created:', contactId);
     }
 
     // Update contact in Active Campaign with name and phone
+    console.log('Updating AC contact...');
     await axios.put(
       `${AC_API_URL}/api/3/contacts/${contactId}`,
       {
         contact: {
           firstName: firstname,
           phone: phone,
-          fieldValues: [
-            {
-              field: 1,
-              value: firstname,
-            },
-          ],
         },
       },
       {
@@ -167,6 +194,7 @@ app.post('/api/register-complete', async (req, res) => {
     );
 
     // Register in Webinargeek
+    console.log('Registering in Webinargeek...');
     const wgResponse = await axios.post(
       'https://api.webinargeek.com/registrations',
       {
@@ -184,12 +212,13 @@ app.post('/api/register-complete', async (req, res) => {
       }
     );
 
+    console.log('✓ Step 2 success');
     res.json({ success: true, registrationId: wgResponse.data.registrationId });
   } catch (error) {
-    console.error('Complete registration error:', error.response?.data || error.message);
+    console.error('❌ Step 2 error:', error.response?.status, error.response?.data || error.message);
     res.status(500).json({ 
       success: false, 
-      message: error.response?.data?.message || 'Registration failed' 
+      message: error.response?.data?.message || error.message || 'Registration failed'
     });
   }
 });
