@@ -63,16 +63,16 @@
                 <p style="font-size: 11px; color: #999; margin-bottom: 14px; font-style: italic;">Diesen Sonntag um 10:00 Uhr</p>
                 <div class="form-group">
                     <input type="text" id="firstname" placeholder="Vorname" required>
-                    <div style="display: flex; gap: 8px; align-items: flex-start;">
-                        <select id="country" style="flex: 0 0 auto; width: 85px; padding: 11px 8px; border: 2px solid #ff9500; border-radius: 10px; font-size: 13px; font-weight: 600; color: #333;">
-                            <option value="DE|+49">🇩🇪 +49 DE</option>
-                            <option value="AT|+43">🇦🇹 +43 AT</option>
-                            <option value="CH|+41">🇨🇭 +41 CH</option>
+                    <div style="display: flex; gap: 0; align-items: stretch;">
+                        <select id="country" style="padding: 11px 10px; border: 2px solid #ff9500; border-right: none; border-radius: 10px 0 0 10px; font-size: 16px; font-weight: 600; color: #333; background: white; cursor: pointer;">
+                            <option value="DE|+49">🇩🇪 +49</option>
+                            <option value="AT|+43">🇦🇹 +43</option>
+                            <option value="CH|+41">🇨🇭 +41</option>
                         </select>
-                        <div style="flex: 1; display: flex; align-items: center; gap: 6px;">
-                            <span id="phonePrefix" style="font-weight: 600; color: #ff9500; font-size: 13px;">+49</span>
-                            <input type="tel" id="phone" placeholder="1234567890" required style="flex: 1;">
+                        <div style="padding: 11px 12px; background: #fff9f5; border: 2px solid #ff9500; border-left: none; border-right: none; font-weight: 600; color: #ff9500; font-size: 14px; display: flex; align-items: center;">
+                            <span id="phonePrefix">+49</span>
                         </div>
+                        <input type="tel" id="phone" placeholder="1234567890" required style="flex: 1; padding: 11px 13px; border: 2px solid #ff9500; border-left: none; border-radius: 0 10px 10px 0; font-size: 14px; font-family: inherit; color: #333;">
                     </div>
                     <div style="font-size: 10px; color: #ff9500; margin-top: 6px; line-height: 1.3;">Zugangscode kommt per SMS. Teilnahme nur mit korrekter Nummer möglich!</div>
                 </div>

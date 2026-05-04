@@ -13,8 +13,15 @@ const AC_API_KEY = process.env.AC_API_KEY;
 const AC_LIST_ID = process.env.AC_LIST_ID || '1';
 const AC_TAG = process.env.AC_TAG;
 
+// Webinargeek
+const WG_API_KEY = process.env.WEBINARGEEK_API_KEY;
+const WG_WEBINAR_ID = process.env.WEBINARGEEK_WEBINAR_ID;
+const WG_EPISODE_ID = process.env.WEBINARGEEK_EPISODE_ID;
+
 // Clicksend SMS
-// Send SMS via Clicksend
+const CLICKSEND_API_USER = process.env.CLICKSEND_API_USER;
+const CLICKSEND_API_KEY = process.env.CLICKSEND_API_KEY;
+const CLICKSEND_SMS_FROM = process.env.CLICKSEND_SMS_FROM || 'Natalie';
 async function sendSMS(phone, country, firstname, accessCode, accessLink) {
   try {
     if (!CLICKSEND_API_USER || !CLICKSEND_API_KEY) {
