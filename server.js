@@ -505,25 +505,27 @@ app.post('/api/register-complete', async (req, res) => {
 
     // Register in Webinargeek
     let subscriptionId;
-    
-    // Define cleanPhone outside try block so it's available in catch
-    let cleanPhone = phone.replace(/^\+/, '').replace(/^0+/, '');
+    let confirmationLink;
+    let watchLink;
     
     try {
-      console.log('📍 Registering in Webinargeek...');
-      console.log('Broadcast ID:', broadcastId);
+      console.log('\n╔════════════════════════════════════════════╗');
+      console.log('║  📍 WEBINARGEEK REGISTRATION                ║');
+      console.log('╚════════════════════════════════════════════╝');
       
-      // Build subscription payload - TRY WITHOUT COUNTRY FIRST
+      console.log('\n📊 PAYLOAD:');
       const wgPayload = {
         firstname: firstname,
         email: email,
-        phone: cleanPhone, // Try without + prefix and leading 0
+        phone: phone,
+        country: country,
       };
+      console.log(JSON.stringify(wgPayload, null, 2));
       
-      console.log('WG Subscription Payload:', wgPayload);
-      console.log('Original phone:', phone);
-      console.log('Cleaned phone:', cleanPhone);
-      console.log('WG Endpoint:', `https://app.webinargeek.com/api/v2/broadcasts/${broadcastId}/subscriptions`);
+      console.log('\n🔑 API CONFIG:');
+      console.log('  API-Key:', WG_API_KEY.substring(0, 10) + '...');
+      console.log('  Broadcast ID:', broadcastId);
+      console.log('  Endpoint:', `https://app.webinargeek.com/api/v2/broadcasts/${broadcastId}/subscriptions`);
       
       const wgResponse = await axios.post(
         `https://app.webinargeek.com/api/v2/broadcasts/${broadcastId}/subscriptions`,
@@ -534,85 +536,45 @@ app.post('/api/register-complete', async (req, res) => {
         }
       );
 
-      subscriptionId = wgResponse.data.id;
-      console.log('✓ Webinargeek registration successful');
-      console.log('Subscription ID:', subscriptionId);
-      console.log('Full Response:', wgResponse.data);
-    } catch (wgSubError) {
-      console.error('❌ Webinargeek subscription error:', wgSubError.response?.status);
-      console.error('Error message:', wgSubError.message);
-      console.error('Response data:', JSON.stringify(wgSubError.response?.data, null, 2));
-      console.error('Response headers:', wgSubError.response?.headers);
+      console.log('\n✅ SUCCESS!');
+      console.log('Response Status:', wgResponse.status);
+      console.log('Response Data:', JSON.stringify(wgResponse.data, null, 2));
       
-      // Try again WITH country if first attempt failed
-      if (wgSubError.response?.status === 422) {
-        console.log('📍 Retrying WITH country field...');
-        try {
-          const wgPayload2 = {
-            firstname: firstname,
-            email: email,
-            phone: phone,
-            country: country,
-          };
-          
-          console.log('Retry payload:', wgPayload2);
-          
-          const wgResponse2 = await axios.post(
-            `https://app.webinargeek.com/api/v2/broadcasts/${broadcastId}/subscriptions`,
-            wgPayload2,
-            { 
-              headers: { 'Api-Token': WG_API_KEY },
-              timeout: 10000
-            }
-          );
-          
-          subscriptionId = wgResponse2.data.id;
-          console.log('✓ Retry successful!');
-        } catch (wgRetryError) {
-          console.error('❌ Retry also failed:', wgRetryError.response?.data);
-          return res.status(422).json({ 
-            success: false, 
-            message: 'Webinargeek subscription error (both attempts failed)',
-            details: {
-              attempt1: {
-                status: wgSubError.response?.status,
-                data: wgSubError.response?.data
-              },
-              attempt2: {
-                status: wgRetryError.response?.status,
-                data: wgRetryError.response?.data
-              },
-              payload1: {
-                firstname: firstname,
-                email: email,
-                phone: cleanPhone
-              },
-              payload2: {
-                firstname: firstname,
-                email: email,
-                phone: phone,
-                country: country
-              }
-            }
-          });
-        }
-      } else {
-        return res.status(wgSubError.response?.status || 500).json({ 
-          success: false, 
-          message: 'Webinargeek subscription error: ' + (wgSubError.response?.data?.message || wgSubError.message),
-          details: {
-            status: wgSubError.response?.status,
-            data: wgSubError.response?.data,
-            broadcastId: broadcastId,
-            payload: {
-              firstname: firstname,
-              email: email,
-              phone: phone,
-              country: country
-            }
+      subscriptionId = wgResponse.data.id;
+      confirmationLink = wgResponse.data.confirmation_link || wgResponse.data.confirmationLink;
+      watchLink = wgResponse.data.watch_link || wgResponse.data.watchLink;
+      
+      console.log('\n📥 EXTRACTED:');
+      console.log('  subscriptionId:', subscriptionId);
+      console.log('  confirmationLink:', confirmationLink);
+      console.log('  watchLink:', watchLink);
+      
+    } catch (wgError) {
+      console.log('\n❌ ERROR!');
+      console.log('Status:', wgError.response?.status);
+      console.log('Status Text:', wgError.response?.statusText);
+      console.log('Message:', wgError.message);
+      console.log('Config URL:', wgError.config?.url);
+      console.log('Config Data:', wgError.config?.data);
+      console.log('Response Headers:', JSON.stringify(wgError.response?.headers, null, 2));
+      console.log('Response Data:', JSON.stringify(wgError.response?.data, null, 2));
+      
+      return res.status(422).json({ 
+        success: false, 
+        message: 'Webinargeek subscription error',
+        error: {
+          status: wgError.response?.status,
+          statusText: wgError.response?.statusText,
+          message: wgError.message,
+          data: wgError.response?.data,
+          headers: wgError.response?.headers,
+          config: {
+            url: wgError.config?.url,
+            method: wgError.config?.method,
+            payload: wgError.config?.data ? JSON.parse(wgError.config.data) : null
           }
-        });
-      }
+        }
+      });
     }
 
     const confirmationLink = wgResponse?.data.confirmation_link;
