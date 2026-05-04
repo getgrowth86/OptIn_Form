@@ -155,7 +155,6 @@ app.post('/api/register-complete', async (req, res) => {
     console.log('Email:', email);
     console.log('Name:', firstname);
     console.log('Phone:', phone);
-    console.log('Country:', country);
 
     // ===== 1. ACTIVECAMPAIGN =====
     console.log('\n1️⃣ ACTIVECAMPAIGN');
@@ -171,17 +170,12 @@ app.post('/api/register-complete', async (req, res) => {
 
       const acContactId = acSearchRes.data.contacts[0].id;
 
-      // Update with firstname and phone
       await axios.put(
         `${AC_API_URL}/api/3/contacts/${acContactId}`,
         {
           contact: {
             firstName: firstname,
-            phone: phone,
-            fieldValues: [
-              { field: '1', value: firstname },
-              { field: '2', value: phone }
-            ]
+            phone: phone
           }
         },
         { headers: { 'Api-Token': AC_API_KEY } }
@@ -192,7 +186,7 @@ app.post('/api/register-complete', async (req, res) => {
       console.error('❌ AC Error:', acErr.message);
       return res.status(400).json({ 
         success: false, 
-        message: 'Failed to update ActiveCampaign: ' + acErr.message 
+        message: 'Failed to update ActiveCampaign'
       });
     }
 
@@ -208,7 +202,6 @@ app.post('/api/register-complete', async (req, res) => {
       country: country
     };
 
-    // Try multiple endpoints
     const endpoints = [
       `https://app.webinargeek.com/api/v2/episodes/${WG_EPISODE_ID}/subscriptions`,
       `https://app.webinargeek.com/api/v2/webinars/459178/episodes/${WG_EPISODE_ID}/subscriptions`,
@@ -224,13 +217,19 @@ app.post('/api/register-complete', async (req, res) => {
           timeout: 5000
         });
         
+        // 🔍 DEBUG: LOG COMPLETE RESPONSE
+        console.log('📦 Full WG Response:', JSON.stringify(wgRes.data, null, 2));
+        
         subscriptionId = wgRes.data.id || wgRes.data.subscription_id || 'success';
         watchLink = wgRes.data.watch_link || wgRes.data.confirmation_link || watchLink;
-        console.log('✓ SUCCESS at:', endpoint);
+        
+        console.log('✓ SUCCESS');
+        console.log('  - subscriptionId:', subscriptionId);
+        console.log('  - watchLink:', watchLink);
         wgSuccess = true;
         break;
       } catch (err) {
-        console.log(`  ❌ Failed: ${err.response?.data?.message || err.message}`);
+        console.log(`  ❌ Failed:`, err.message);
       }
     }
 
@@ -238,7 +237,7 @@ app.post('/api/register-complete', async (req, res) => {
       console.error('❌ All WG endpoints failed');
       return res.status(400).json({ 
         success: false, 
-        message: 'Webinargeek registration failed - invalid episode'
+        message: 'Webinargeek registration failed'
       });
     }
 
