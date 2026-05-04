@@ -309,6 +309,22 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Serve HTML on root
+app.get('/', (req, res) => {
+  // Read the HTML file from the same directory
+  const fs = require('fs');
+  const htmlPath = __dirname + '/meilenkurs-frontend.html';
+  
+  try {
+    const html = fs.readFileSync(htmlPath, 'utf8');
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
+  } catch (err) {
+    console.error('Error serving HTML:', err);
+    res.status(500).send('Error loading form');
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
