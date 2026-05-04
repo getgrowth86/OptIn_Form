@@ -3,481 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meilenkurs 2.0 - Anmeldung</title>
+    <title>Meilenkurs 2.0</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            padding: 12px;
-        }
-
-        .form-container {
-            max-width: 380px;
-            margin: 0 auto;
-        }
-
-        .form-wrapper {
-            background: white;
-            border-radius: 14px;
-            padding: 18px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-            animation: slideUp 0.4s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .progress-bar {
-            height: 2px;
-            background: #e8e8e8;
-            border-radius: 1px;
-            margin-bottom: 16px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff9500 0%, #ff7500 100%);
-            width: 33%;
-            transition: width 0.3s ease;
-        }
-
-        .step-title {
-            font-size: 10px;
-            color: #ff9500;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            margin-bottom: 6px;
-        }
-
-        .step-heading {
-            font-size: 16px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 4px;
-        }
-
-        .step-description {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 14px;
-            line-height: 1.4;
-        }
-
-        .step {
-            display: none;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .step.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 11px 13px;
-            border: 2px solid #ff9500;
-            border-radius: 10px;
-            font-size: 14px;
-            font-family: inherit;
-            transition: all 0.2s ease;
-            color: #333;
-            background: white;
-        }
-
-        .form-group input::placeholder {
-            color: #bbb;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #ff7500;
-            background: #fffaf7;
-            box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.12);
-        }
-
-        .form-group button {
-            width: 100%;
-            padding: 12px 18px;
-            background: linear-gradient(135deg, #ff9500 0%, #ff7500 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            min-height: 42px;
-        }
-
-        .form-group button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 149, 0, 0.3);
-        }
-
-        .form-group button:disabled {
-            opacity: 0.65;
-            cursor: not-allowed;
-        }
-
-        .airplane-icon {
-            font-size: 16px;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .button-group button {
-            flex: 1;
-            padding: 10px 14px;
-            font-size: 12px;
-            min-height: 38px;
-        }
-
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-        }
-
-        .btn-secondary:hover:not(:disabled) {
-            background: #e0e0e0;
-        }
-
-        .spinner {
-            width: 12px;
-            height: 12px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top: 2px solid white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error-message {
-            color: #e74c3c;
-            font-size: 11px;
-            margin-top: 4px;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        .form-group.error input,
-        .form-group.error select {
-            border-color: #e74c3c;
-            background: #fff5f5;
-        }
-
-        .slot-selector {
-            background: #fff9f5;
-            border: 2px solid #ff9500;
-            border-radius: 10px;
-            padding: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-bottom: 8px;
-        }
-
-        .slot-selector:hover {
-            background: #ffe8d6;
-        }
-
-        .slot-selector.selected {
-            background: #ff9500;
-            color: white;
-            border-color: #ff7500;
-        }
-
-        .slot-time {
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .slot-availability {
-            font-size: 11px;
-            opacity: 0.8;
-        }
-
-        .success-screen {
-            text-align: center;
-        }
-
-        .success-icon {
-            width: 56px;
-            height: 56px;
-            background: #ff9500;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 14px;
-            font-size: 28px;
-            color: white;
-            animation: bounce 0.6s ease-out;
-        }
-
-        @keyframes bounce {
-            0% { transform: scale(0.5); }
-            70% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        .success-message {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .success-text {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 14px;
-            line-height: 1.5;
-        }
-
-        .countdown-timer {
-            background: #fff9f5;
-            border: 2px solid #ff9500;
-            border-radius: 10px;
-            padding: 11px;
-            margin: 12px 0;
-            font-size: 11px;
-            color: #666;
-        }
-
-        .countdown-timer strong {
-            color: #ff9500;
-            font-size: 13px;
-        }
-
-        .info-text {
-            font-size: 10px;
-            color: #999;
-            margin-top: 10px;
-            line-height: 1.4;
-            text-align: center;
-        }
-
-        .info-text strong {
-            color: #ff9500;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 14px;
-        }
-
-        .loading p {
-            font-size: 12px;
-            color: #666;
-            margin-top: 6px;
-        }
-
-        @media (max-width: 480px) {
-            .form-container {
-                max-width: 100%;
-            }
-
-            .form-wrapper {
-                padding: 16px;
-            }
-
-            .form-group input {
-                font-size: 16px; /* Prevents zoom on iOS */
-            }
-
-            .button-group {
-                flex-direction: column;
-            }
-
-            .button-group button {
-                flex: 1 !important;
-            }
-        }
-
-        @media (max-width: 340px) {
-            .form-wrapper {
-                padding: 12px;
-            }
-
-            .step-heading {
-                font-size: 14px;
-            }
-
-            .form-group input {
-                padding: 10px 12px;
-                font-size: 13px;
-            }
-
-            .form-group button {
-                padding: 10px 14px;
-                font-size: 12px;
-                min-height: 38px;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 12px; }
+        .form-container { max-width: 380px; margin: 0 auto; }
+        .form-wrapper { background: white; border-radius: 14px; padding: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
+        .progress-bar { height: 2px; background: #e8e8e8; border-radius: 1px; margin-bottom: 16px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #ff9500 0%, #ff7500 100%); width: 33%; transition: width 0.3s ease; }
+        .step-title { font-size: 10px; color: #ff9500; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px; }
+        .step-heading { font-size: 16px; font-weight: 700; color: #333; margin-bottom: 4px; }
+        .step-description { font-size: 12px; color: #666; margin-bottom: 14px; line-height: 1.4; }
+        .step { display: none; animation: fadeIn 0.3s ease-out; }
+        .step.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .form-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+        input, select { width: 100%; padding: 11px 13px; border: 2px solid #ff9500; border-radius: 10px; font-size: 14px; font-family: inherit; color: #333; }
+        input::placeholder { color: #bbb; }
+        input:focus, select:focus { outline: none; border-color: #ff7500; background: #fffaf7; box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.12); }
+        button { width: 100%; padding: 12px 18px; background: linear-gradient(135deg, #ff9500 0%, #ff7500 100%); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.4px; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 42px; transition: all 0.2s ease; }
+        button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 149, 0, 0.3); }
+        button:disabled { opacity: 0.65; cursor: not-allowed; }
+        .button-group { display: flex; gap: 8px; margin-top: 12px; }
+        .button-group button { flex: 1; padding: 10px 14px; font-size: 12px; min-height: 38px; }
+        .btn-secondary { background: #f0f0f0; color: #333; }
+        .btn-secondary:hover { background: #e0e0e0; }
+        .slot-selector { background: #fff9f5; border: 2px solid #ff9500; border-radius: 10px; padding: 12px; cursor: pointer; transition: all 0.2s ease; margin-bottom: 8px; }
+        .slot-selector:hover { background: #ffe8d6; }
+        .slot-selector.selected { background: #ff9500; color: white; border-color: #ff7500; }
+        .slot-time { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+        .slot-availability { font-size: 11px; opacity: 0.8; }
+        .success-screen { text-align: center; }
+        .success-icon { width: 56px; height: 56px; background: #ff9500; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 28px; color: white; }
+        .success-message { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #333; }
+        .success-text { font-size: 12px; color: #666; margin-bottom: 14px; line-height: 1.5; }
+        .countdown-timer { background: #fff9f5; border: 2px solid #ff9500; border-radius: 10px; padding: 11px; margin: 12px 0; font-size: 11px; color: #666; }
+        .countdown-timer strong { color: #ff9500; font-size: 13px; }
+        .info-text { font-size: 10px; color: #999; margin-top: 10px; line-height: 1.4; text-align: center; }
+        .info-text strong { color: #ff9500; }
+        .error { color: #e74c3c; font-size: 11px; margin-top: 4px; }
+        @media (max-width: 480px) { input { font-size: 16px; } .button-group { flex-direction: column; } .button-group button { flex: 1 !important; } }
     </style>
 </head>
 <body>
     <div class="form-container">
         <div class="form-wrapper">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
 
-            <!-- STEP 1: EMAIL -->
+            <!-- STEP 1 -->
             <div class="step active" id="step1">
                 <div class="step-title">Schritt 1 von 3</div>
                 <h2 class="step-heading">Deine E-Mail</h2>
                 <p class="step-description">Damit wir dich einladen können</p>
-
-                <form id="form1">
-                    <div class="form-group">
-                        <input 
-                            type="email" 
-                            id="email" 
-                            placeholder="E-Mail-Adresse" 
-                            required
-                            autocomplete="email"
-                        >
-                        <button type="button" onclick="nextStep(1)">
-                            <span class="airplane-icon">✈️</span>
-                            Weiter
-                        </button>
-                    </div>
-                    <div class="error-message" id="errorEmail"></div>
-                </form>
+                <div class="form-group">
+                    <input type="email" id="email" placeholder="E-Mail-Adresse" required>
+                    <button onclick="goToStep(2)">✈️ Weiter</button>
+                </div>
             </div>
 
-            <!-- STEP 2: TERMIN -->
+            <!-- STEP 2 -->
             <div class="step" id="step2">
                 <div class="step-title">Schritt 2 von 3</div>
                 <h2 class="step-heading">Wähle Termin</h2>
                 <p class="step-description">Sonntag 10:00 Uhr</p>
-
-                <div id="slotContainer"></div>
-
-                <div class="button-group">
-                    <button class="btn-secondary" onclick="prevStep()">← Zurück</button>
-                    <button id="step2Btn" onclick="nextStep(2)" disabled style="background: linear-gradient(135deg, #ff9500 0%, #ff7500 100%); flex: 1.5;">
-                        <span class="airplane-icon">✈️</span>
-                        Weiter
-                    </button>
+                <div class="form-group">
+                    <div class="slot-selector selected" onclick="selectSlot(this); document.getElementById('step2Btn').disabled=false;">
+                        <div class="slot-time">📅 Sonntag, 10:00 Uhr</div>
+                        <div class="slot-availability">✓ Verfügbar</div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-secondary" onclick="goToStep(1)">← Zurück</button>
+                        <button id="step2Btn" onclick="goToStep(3)" style="background: linear-gradient(135deg, #ff9500 0%, #ff7500 100%); flex: 1.5;">✈️ Weiter</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- STEP 3: PERSONAL DATEN -->
+            <!-- STEP 3 -->
             <div class="step" id="step3">
                 <div class="step-title">Schritt 3 von 3</div>
                 <h2 class="step-heading">Fast fertig!</h2>
                 <p class="step-description">Deine Daten</p>
-
-                <form id="form3">
-                    <div class="form-group">
-                        <input 
-                            type="text" 
-                            id="firstname" 
-                            placeholder="Vorname" 
-                            required
-                        >
-                        <div class="error-message" id="errorFirstname"></div>
+                <div class="form-group">
+                    <input type="text" id="firstname" placeholder="Vorname" required>
+                    <input type="text" id="lastname" placeholder="Nachname" required>
+                    <input type="tel" id="phone" placeholder="Telefon" required>
+                    <div class="button-group">
+                        <button class="btn-secondary" onclick="goToStep(2)">← Zurück</button>
+                        <button onclick="goToStep('success')" style="background: linear-gradient(135deg, #ff9500 0%, #ff7500 100%); flex: 1.5;">✈️ Anmelden</button>
                     </div>
-
-                    <div class="form-group">
-                        <input 
-                            type="text" 
-                            id="lastname" 
-                            placeholder="Nachname" 
-                            required
-                        >
-                        <div class="error-message" id="errorLastname"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <input 
-                            type="tel" 
-                            id="phone" 
-                            placeholder="Telefon" 
-                            required
-                        >
-                        <div class="error-message" id="errorPhone"></div>
-                    </div>
-                </form>
-
-                <div class="button-group">
-                    <button class="btn-secondary" onclick="prevStep()">← Zurück</button>
-                    <button onclick="submitForm()" style="background: linear-gradient(135deg, #ff9500 0%, #ff7500 100%); flex: 1.5;">
-                        <span class="airplane-icon">✈️</span>
-                        Anmelden
-                    </button>
                 </div>
             </div>
 
             <!-- SUCCESS -->
-            <div class="step" id="successStep">
+            <div class="step" id="success">
                 <div class="success-screen">
                     <div class="success-icon">✓</div>
                     <div class="success-message">Glückwunsch!</div>
-                    <div class="success-text">
-                        E-Mail & SMS mit Zugangslink folgen. Spam-Ordner checken!
-                    </div>
-
+                    <div class="success-text">E-Mail & SMS mit Zugangslink folgen. Spam-Ordner checken!</div>
                     <div class="countdown-timer">
                         📅 <strong>Reserviert: <span id="countdown">03:00</span></strong><br>
-                        <strong id="webinarTime" style="font-size: 11px;"></strong>
+                        <strong id="webinarTime" style="font-size: 11px;">Sonntag um 10:00 Uhr</strong>
                     </div>
                 </div>
-            </div>
-
-            <!-- LOADING -->
-            <div class="loading" id="loading" style="display: none;">
-                <div class="spinner" style="display: inline-block;"></div>
-                <p>Verarbeitet...</p>
             </div>
 
             <div class="info-text" id="infoText">
@@ -487,198 +114,34 @@
     </div>
 
     <script>
-        const API_URL = 'https://opt-in-form.vercel.app';
-        const FORM_DATA = {
-            email: '',
-            selectedSlot: null,
-            firstname: '',
-            lastname: '',
-            phone: ''
-        };
+        let currentStep = 1;
 
-        let countdownInterval;
-
-        function updateProgress(step) {
-            const progress = (step / 3) * 100;
+        function updateProgress() {
+            const progress = (currentStep / 3) * 100;
             document.getElementById('progressFill').style.width = progress + '%';
         }
 
-        function showStep(stepNum) {
+        function goToStep(step) {
             document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-            document.getElementById('step' + stepNum).classList.add('active');
-            updateProgress(stepNum === 'success' ? 3 : stepNum);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function nextStep(stepNum) {
-            if (stepNum === 1 && !validateEmail()) return;
-            if (stepNum === 2 && !validateStep2()) return;
-
-            if (stepNum === 1) {
-                FORM_DATA.email = document.getElementById('email').value;
-                registerStep1();
-            } else if (stepNum === 2) {
-                showStep(3);
-            }
-        }
-
-        function prevStep() {
-            const active = document.querySelector('.step.active');
-            const stepNum = parseInt(active.id.replace('step', ''));
-            if (stepNum > 1) showStep(stepNum - 1);
-        }
-
-        function validateEmail() {
-            const email = document.getElementById('email').value.trim();
-            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             
-            if (!email || !regex.test(email)) {
-                document.getElementById('errorEmail').textContent = 'Gültige E-Mail erforderlich';
-                document.getElementById('errorEmail').classList.add('show');
-                return false;
-            }
-            document.getElementById('errorEmail').classList.remove('show');
-            return true;
-        }
-
-        function validateStep2() {
-            if (!FORM_DATA.selectedSlot) {
-                alert('Termin wählen');
-                return false;
-            }
-            return true;
-        }
-
-        function validateStep3() {
-            const firstname = document.getElementById('firstname').value.trim();
-            const lastname = document.getElementById('lastname').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            let valid = true;
-
-            if (!firstname) {
-                document.getElementById('errorFirstname').textContent = 'Erforderlich';
-                document.getElementById('errorFirstname').classList.add('show');
-                valid = false;
+            if (step === 'success') {
+                document.getElementById('success').classList.add('active');
+                currentStep = 4;
+                document.getElementById('infoText').style.display = 'none';
+                startCountdown();
             } else {
-                document.getElementById('errorFirstname').classList.remove('show');
+                currentStep = step;
+                document.getElementById('step' + step).classList.add('active');
+                document.getElementById('infoText').style.display = 'block';
             }
-
-            if (!lastname) {
-                document.getElementById('errorLastname').textContent = 'Erforderlich';
-                document.getElementById('errorLastname').classList.add('show');
-                valid = false;
-            } else {
-                document.getElementById('errorLastname').classList.remove('show');
-            }
-
-            if (!phone || phone.length < 9) {
-                document.getElementById('errorPhone').textContent = 'Gültige Nummer';
-                document.getElementById('errorPhone').classList.add('show');
-                valid = false;
-            } else {
-                document.getElementById('errorPhone').classList.remove('show');
-            }
-
-            return valid;
-        }
-
-        async function registerStep1() {
-            document.getElementById('loading').style.display = 'block';
-
-            try {
-                const response = await fetch(`${API_URL}/api/register-step1`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: FORM_DATA.email })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    FORM_DATA.selectedSlot = getNextSunday();
-                    showStep(2);
-                    renderSlots();
-                } else {
-                    alert('Fehler: ' + (data.message || 'Versuche es später'));
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Verbindungsfehler');
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-            }
-        }
-
-        async function submitForm() {
-            if (!validateStep3()) return;
-
-            FORM_DATA.firstname = document.getElementById('firstname').value;
-            FORM_DATA.lastname = document.getElementById('lastname').value;
-            FORM_DATA.phone = document.getElementById('phone').value;
-
-            document.getElementById('loading').style.display = 'block';
-
-            try {
-                const response = await fetch(`${API_URL}/api/register-complete`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(FORM_DATA)
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showSuccessScreen();
-                } else {
-                    alert('Fehler: ' + (data.message || 'Anmeldung fehlgeschlagen'));
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Verbindungsfehler');
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-            }
-        }
-
-        function getNextSunday() {
-            const today = new Date();
-            const nextSunday = new Date(today);
-            const day = nextSunday.getDay();
-            const daysToAdd = day === 0 ? 7 : 7 - day;
-            nextSunday.setDate(nextSunday.getDate() + daysToAdd);
-            nextSunday.setHours(10, 0, 0, 0);
-            return nextSunday;
-        }
-
-        function renderSlots() {
-            const slot = getNextSunday();
-            const dateStr = slot.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
-            const timeStr = slot.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-
-            document.getElementById('slotContainer').innerHTML = `
-                <div class="slot-selector selected" onclick="selectSlot(this)">
-                    <div class="slot-time">📅 ${dateStr}, ${timeStr} Uhr</div>
-                    <div class="slot-availability">✓ Verfügbar</div>
-                </div>
-            `;
-
-            FORM_DATA.selectedSlot = slot;
-            document.getElementById('step2Btn').disabled = false;
+            
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function selectSlot(el) {
             document.querySelectorAll('.slot-selector').forEach(s => s.classList.remove('selected'));
             el.classList.add('selected');
-            document.getElementById('step2Btn').disabled = false;
-        }
-
-        function showSuccessScreen() {
-            showStep('success');
-            const nextSunday = getNextSunday();
-            const dateStr = nextSunday.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' }) + ' um ' + nextSunday.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('webinarTime').textContent = dateStr;
-            document.getElementById('infoText').style.display = 'none';
-            startCountdown();
         }
 
         function startCountdown() {
@@ -688,13 +151,12 @@
                 const s = seconds % 60;
                 document.getElementById('countdown').textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
                 if (seconds > 0) seconds--;
-                else clearInterval(countdownInterval);
             }
             update();
-            countdownInterval = setInterval(update, 1000);
+            setInterval(update, 1000);
         }
 
-        window.addEventListener('load', () => showStep(1));
+        updateProgress();
     </script>
 </body>
 </html>
