@@ -10,7 +10,7 @@
         .form-container { max-width: 380px; margin: 0 auto; }
         .form-wrapper { background: white; border-radius: 14px; padding: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
         .progress-bar { height: 2px; background: #e8e8e8; border-radius: 1px; margin-bottom: 16px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #ff9500 0%, #ff7500 100%); width: 33%; transition: width 0.3s ease; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #ff9500 0%, #ff7500 100%); width: 50%; transition: width 0.3s ease; }
         .step-title { font-size: 10px; color: #ff9500; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px; }
         .step-heading { font-size: 16px; font-weight: 700; color: #333; margin-bottom: 4px; }
         .step-description { font-size: 12px; color: #666; margin-bottom: 14px; line-height: 1.4; }
@@ -28,20 +28,14 @@
         .button-group button { flex: 1; padding: 10px 14px; font-size: 12px; min-height: 38px; }
         .btn-secondary { background: #f0f0f0; color: #333; }
         .btn-secondary:hover { background: #e0e0e0; }
-        .slot-selector { background: #fff9f5; border: 2px solid #ff9500; border-radius: 10px; padding: 12px; cursor: pointer; transition: all 0.2s ease; margin-bottom: 8px; }
-        .slot-selector:hover { background: #ffe8d6; }
-        .slot-selector.selected { background: #ff9500; color: white; border-color: #ff7500; }
-        .slot-time { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
-        .slot-availability { font-size: 11px; opacity: 0.8; }
+        .countdown-timer { background: #fff9f5; border: 2px solid #ff9500; border-radius: 10px; padding: 11px; margin: 12px 0; font-size: 11px; color: #666; }
+        .countdown-timer strong { color: #ff9500; font-size: 13px; }
         .success-screen { text-align: center; }
         .success-icon { width: 56px; height: 56px; background: #ff9500; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 28px; color: white; }
         .success-message { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #333; }
         .success-text { font-size: 12px; color: #666; margin-bottom: 14px; line-height: 1.5; }
-        .countdown-timer { background: #fff9f5; border: 2px solid #ff9500; border-radius: 10px; padding: 11px; margin: 12px 0; font-size: 11px; color: #666; }
-        .countdown-timer strong { color: #ff9500; font-size: 13px; }
         .info-text { font-size: 10px; color: #999; margin-top: 10px; line-height: 1.4; text-align: center; }
         .info-text strong { color: #ff9500; }
-        .error { color: #e74c3c; font-size: 11px; margin-top: 4px; }
         @media (max-width: 480px) { input { font-size: 16px; } .button-group { flex-direction: column; } .button-group button { flex: 1 !important; } }
     </style>
 </head>
@@ -50,9 +44,9 @@
         <div class="form-wrapper">
             <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
 
-            <!-- STEP 1 -->
+            <!-- STEP 1: EMAIL -->
             <div class="step active" id="step1">
-                <div class="step-title">Schritt 1 von 3</div>
+                <div class="step-title">Schritt 1 von 2</div>
                 <h2 class="step-heading">Deine E-Mail</h2>
                 <p class="step-description">Damit wir dich einladen können</p>
                 <div class="form-group">
@@ -61,34 +55,23 @@
                 </div>
             </div>
 
-            <!-- STEP 2 -->
+            <!-- STEP 2: NAME + PHONE + COUNTDOWN -->
             <div class="step" id="step2">
-                <div class="step-title">Schritt 2 von 3</div>
-                <h2 class="step-heading">Wähle Termin</h2>
-                <p class="step-description">Sonntag 10:00 Uhr</p>
-                <div class="form-group">
-                    <div class="slot-selector selected" onclick="selectSlot(this); document.getElementById('step2Btn').disabled=false;">
-                        <div class="slot-time">📅 Sonntag, 10:00 Uhr</div>
-                        <div class="slot-availability">✓ Verfügbar</div>
-                    </div>
-                    <div class="button-group">
-                        <button class="btn-secondary" onclick="goToStep(1)">← Zurück</button>
-                        <button id="step2Btn" onclick="goToStep(3)" style="background: linear-gradient(135deg, #ff9500 0%, #ff7500 100%); flex: 1.5;">✈️ Weiter</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- STEP 3 -->
-            <div class="step" id="step3">
-                <div class="step-title">Schritt 3 von 3</div>
+                <div class="step-title">Schritt 2 von 2</div>
                 <h2 class="step-heading">Fast fertig!</h2>
                 <p class="step-description">Deine Daten</p>
                 <div class="form-group">
                     <input type="text" id="firstname" placeholder="Vorname" required>
                     <input type="text" id="lastname" placeholder="Nachname" required>
                     <input type="tel" id="phone" placeholder="Telefon" required>
+                </div>
+                <div class="countdown-timer" id="countdown2">
+                    📅 <strong>Reserviert: <span id="countdown2Text">03:00</span></strong><br>
+                    <strong style="font-size: 11px;">Sonntag um 10:00 Uhr</strong>
+                </div>
+                <div class="form-group">
                     <div class="button-group">
-                        <button class="btn-secondary" onclick="goToStep(2)">← Zurück</button>
+                        <button class="btn-secondary" onclick="goToStep(1)">← Zurück</button>
                         <button onclick="goToStep('success')" style="background: linear-gradient(135deg, #ff9500 0%, #ff7500 100%); flex: 1.5;">✈️ Anmelden</button>
                     </div>
                 </div>
@@ -101,8 +84,8 @@
                     <div class="success-message">Glückwunsch!</div>
                     <div class="success-text">E-Mail & SMS mit Zugangslink folgen. Spam-Ordner checken!</div>
                     <div class="countdown-timer">
-                        📅 <strong>Reserviert: <span id="countdown">03:00</span></strong><br>
-                        <strong id="webinarTime" style="font-size: 11px;">Sonntag um 10:00 Uhr</strong>
+                        📅 <strong>Reserviert: <span id="countdownSuccess">03:00</span></strong><br>
+                        <strong style="font-size: 11px;">Sonntag um 10:00 Uhr</strong>
                     </div>
                 </div>
             </div>
@@ -115,9 +98,10 @@
 
     <script>
         let currentStep = 1;
+        let countdownRunning = false;
 
         function updateProgress() {
-            const progress = (currentStep / 3) * 100;
+            const progress = (currentStep / 2) * 100;
             document.getElementById('progressFill').style.width = progress + '%';
         }
 
@@ -126,22 +110,33 @@
             
             if (step === 'success') {
                 document.getElementById('success').classList.add('active');
-                currentStep = 4;
+                currentStep = 3;
                 document.getElementById('infoText').style.display = 'none';
                 startCountdown();
             } else {
                 currentStep = step;
                 document.getElementById('step' + step).classList.add('active');
                 document.getElementById('infoText').style.display = 'block';
+                if (step === 2) startCountdownInStep2();
             }
             
             updateProgress();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function selectSlot(el) {
-            document.querySelectorAll('.slot-selector').forEach(s => s.classList.remove('selected'));
-            el.classList.add('selected');
+        function startCountdownInStep2() {
+            if (countdownRunning) return;
+            countdownRunning = true;
+            
+            let seconds = 180;
+            function update() {
+                const m = Math.floor(seconds / 60);
+                const s = seconds % 60;
+                document.getElementById('countdown2Text').textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+                if (seconds > 0) seconds--;
+            }
+            update();
+            const interval = setInterval(update, 1000);
         }
 
         function startCountdown() {
@@ -149,7 +144,7 @@
             function update() {
                 const m = Math.floor(seconds / 60);
                 const s = seconds % 60;
-                document.getElementById('countdown').textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+                document.getElementById('countdownSuccess').textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
                 if (seconds > 0) seconds--;
             }
             update();
