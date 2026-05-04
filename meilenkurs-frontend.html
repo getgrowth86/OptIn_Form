@@ -18,15 +18,15 @@
         }
 
         .form-container {
-            max-width: 450px;
+            max-width: 500px;
             margin: 0 auto;
         }
 
         .form-wrapper {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
             animation: slideUp 0.4s ease-out;
         }
 
@@ -43,54 +43,57 @@
 
         .form-group {
             display: flex;
-            gap: 10px;
-            align-items: stretch;
-            margin-bottom: 12px;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 14px;
         }
 
         .form-group input {
-            flex: 1;
-            padding: 13px 15px;
-            border: 2px solid #e8e8e8;
-            border-radius: 8px;
-            font-size: 14px;
+            width: 100%;
+            padding: 15px 16px;
+            border: 2px solid #ff9500;
+            border-radius: 12px;
+            font-size: 15px;
             font-family: inherit;
             transition: all 0.2s ease;
             color: #333;
+            background: white;
         }
 
         .form-group input::placeholder {
-            color: #999;
+            color: #bbb;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #ff9500;
+            border-color: #ff7500;
             background: #fffaf7;
-            box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.1);
+            box-shadow: 0 0 0 4px rgba(255, 149, 0, 0.15);
         }
 
         .form-group button {
-            padding: 13px 25px;
+            width: 100%;
+            padding: 16px 24px;
             background: linear-gradient(135deg, #ff9500 0%, #ff7500 100%);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 12px;
+            font-size: 15px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
-            white-space: nowrap;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            gap: 10px;
+            min-height: 48px;
         }
 
         .form-group button:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 149, 0, 0.3);
+            box-shadow: 0 10px 25px rgba(255, 149, 0, 0.3);
         }
 
         .form-group button:active:not(:disabled) {
@@ -98,17 +101,13 @@
         }
 
         .form-group button:disabled {
-            opacity: 0.6;
+            opacity: 0.65;
             cursor: not-allowed;
         }
 
-        .form-group button.loading {
-            pointer-events: none;
-        }
-
         .spinner {
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-top: 2px solid white;
             border-radius: 50%;
@@ -122,14 +121,14 @@
 
         .error-message {
             color: #e74c3c;
-            font-size: 12px;
-            margin-top: 8px;
+            font-size: 13px;
+            margin-top: 10px;
             display: none;
+            animation: shake 0.3s ease-in-out;
         }
 
         .error-message.show {
             display: block;
-            animation: shake 0.3s ease-in-out;
         }
 
         @keyframes shake {
@@ -140,16 +139,19 @@
 
         .form-group.error input {
             border-color: #e74c3c;
+            background: #fff5f5;
         }
 
         .success-message {
             background: #27ae60;
             color: white;
-            padding: 14px 16px;
-            border-radius: 8px;
-            margin-bottom: 15px;
+            padding: 16px 18px;
+            border-radius: 12px;
+            margin-bottom: 16px;
             display: none;
             animation: slideDown 0.3s ease-out;
+            font-size: 14px;
+            line-height: 1.5;
         }
 
         .success-message.show {
@@ -169,9 +171,9 @@
 
         .info-text {
             font-size: 12px;
-            color: #666;
-            margin-top: 12px;
-            line-height: 1.5;
+            color: #888;
+            margin-top: 14px;
+            line-height: 1.6;
             text-align: center;
         }
 
@@ -179,18 +181,51 @@
             color: #ff9500;
         }
 
-        @media (max-width: 480px) {
+        /* Responsive */
+        @media (max-width: 600px) {
+            .form-wrapper {
+                padding: 20px;
+                border-radius: 14px;
+            }
+
+            .form-group {
+                gap: 12px;
+                margin-bottom: 12px;
+            }
+
+            .form-group input {
+                padding: 14px 15px;
+                font-size: 16px; /* Prevents zoom on iOS */
+                border-radius: 10px;
+            }
+
+            .form-group button {
+                padding: 14px 20px;
+                min-height: 46px;
+                font-size: 14px;
+                border-radius: 10px;
+            }
+
+            .info-text {
+                font-size: 11px;
+                margin-top: 12px;
+            }
+        }
+
+        @media (max-width: 380px) {
             .form-wrapper {
                 padding: 16px;
             }
 
-            .form-group {
-                flex-direction: column;
+            .form-group input {
+                padding: 12px 14px;
+                font-size: 15px;
             }
 
             .form-group button {
-                width: 100%;
-                justify-content: center;
+                padding: 12px 16px;
+                min-height: 44px;
+                font-size: 13px;
             }
         }
     </style>
@@ -199,7 +234,7 @@
     <div class="form-container">
         <div class="form-wrapper">
             <div class="success-message" id="successMessage">
-                ✓ Super! Schau in deine E-Mail (Spam-Ordner nicht vergessen!)
+                ✓ Perfekt! Schau in deine E-Mail (auch Spam-Ordner checken!)
             </div>
 
             <form id="emailForm" onsubmit="submitForm(event)">
@@ -221,7 +256,7 @@
             </form>
 
             <div class="info-text">
-                Völlig kostenlos | 100% Mehrwert | 256-Bit Verschlüsselt
+                Völlig kostenlos | 100% Mehrwert | <strong>256-Bit Verschlüsselt</strong>
             </div>
         </div>
     </div>
@@ -235,11 +270,18 @@
         const errorMessage = document.getElementById('errorMessage');
         const successMessage = document.getElementById('successMessage');
         const form = document.getElementById('emailForm');
+        const formGroup = form.querySelector('.form-group');
 
         // Clear error on input
         emailInput.addEventListener('input', () => {
             errorMessage.classList.remove('show');
-            emailInput.parentElement.classList.remove('error');
+            formGroup.classList.remove('error');
+        });
+
+        // Clear error on focus
+        emailInput.addEventListener('focus', () => {
+            errorMessage.classList.remove('show');
+            formGroup.classList.remove('error');
         });
 
         async function submitForm(e) {
@@ -252,7 +294,8 @@
             if (!email || !emailRegex.test(email)) {
                 errorMessage.textContent = 'Bitte gib eine gültige E-Mail-Adresse ein';
                 errorMessage.classList.add('show');
-                emailInput.parentElement.classList.add('error');
+                formGroup.classList.add('error');
+                emailInput.focus();
                 return;
             }
 
@@ -276,10 +319,10 @@
                     form.style.display = 'none';
                     successMessage.classList.add('show');
 
-                    // Optional: Redirect nach 2 Sekunden
+                    // Optional: Redirect nach 3 Sekunden
                     // setTimeout(() => {
                     //     window.location.href = 'https://deine-landing-page.com/danke';
-                    // }, 2000);
+                    // }, 3000);
                 } else {
                     throw new Error(data.message || 'Anmeldung fehlgeschlagen');
                 }
@@ -287,12 +330,14 @@
                 console.error('Error:', error);
                 errorMessage.textContent = error.message || 'Verbindungsfehler. Versuche es später erneut.';
                 errorMessage.classList.add('show');
+                formGroup.classList.add('error');
 
                 // Re-enable form
                 submitBtn.disabled = false;
                 emailInput.disabled = false;
                 spinner.style.display = 'none';
                 btnText.textContent = 'Jetzt kostenlos anmelden';
+                emailInput.focus();
             }
         }
     </script>
