@@ -13,9 +13,63 @@ const AC_API_KEY = process.env.AC_API_KEY;
 const AC_LIST_ID = process.env.AC_LIST_ID || '1';
 const AC_TAG = process.env.AC_TAG;
 
-const WG_API_KEY = process.env.WEBINARGEEK_API_KEY;
-const WG_WEBINAR_ID = process.env.WEBINARGEEK_WEBINAR_ID;
-const WG_EPISODE_ID = process.env.WEBINARGEEK_EPISODE_ID;
+// Clicksend SMS
+// Send SMS via Clicksend
+async function sendSMS(phone, country, firstname, accessCode, accessLink) {
+  try {
+    if (!CLICKSEND_API_USER || !CLICKSEND_API_KEY) {
+      console.log('Clicksend not configured, skipping SMS');
+      return true;
+    }
+
+    // Format phone number with country code
+    let formattedPhone = phone;
+    if (country === 'DE') formattedPhone = '+49' + (phone.startsWith('0') ? phone.slice(1) : phone);
+    else if (country === 'AT') formattedPhone = '+43' + (phone.startsWith('0') ? phone.slice(1) : phone);
+    else if (country === 'CH') formattedPhone = '+41' + (phone.startsWith('0') ? phone.slice(1) : phone);
+
+    const message = `Hallo ${firstname}
+
+Du hast dich für den Workshop mit Meilenweitvoraus angemeldet. 
+
+Zugangscode: ${accessCode}
+
+👇 Hier Dein Zugangslink (auch per Email): 
+
+${accessLink}
+
+Sonnige Grüße
+Natalie`;
+
+    console.log('Sending SMS to:', formattedPhone);
+    
+    const response = await axios.post(
+      'https://rest.clicksend.com/v3/sms/send',
+      {
+        messages: [
+          {
+            to: formattedPhone,
+            body: message,
+            from: CLICKSEND_SMS_FROM,
+          },
+        ],
+      },
+      {
+        auth: {
+          username: CLICKSEND_API_USER,
+          password: CLICKSEND_API_KEY,
+        },
+      }
+    );
+
+    console.log('✓ SMS sent successfully');
+    return true;
+  } catch (error) {
+    console.error('❌ SMS error:', error.response?.data || error.message);
+    // Don't fail the whole registration if SMS fails
+    return true;
+  }
+}
 
 // Serve frontend
 app.get('/', (req, res) => {
@@ -242,8 +296,25 @@ app.post('/api/register-complete', async (req, res) => {
       }
     );
 
+    console.log('Webinargeek Response:', JSON.stringify(wgResponse.data));
+
+    const registrationId = wgResponse.data.registrationId;
+    // Try to get access link from Webinargeek response
+    const accessLink = wgResponse.data.accessLink || 
+                      wgResponse.data.registrationLink || 
+                      wgResponse.data.link ||
+                      wgResponse.data.webinarLink ||
+                      `https://webinar.thorstenkoch-defi.com/?access=${registrationId}`;
+    
+    console.log('Registration ID:', registrationId);
+    console.log('Access Link:', accessLink);
+    console.log('Sending SMS...');
+
+    // Send SMS
+    await sendSMS(phone, country, firstname, registrationId, accessLink);
+
     console.log('✓ Step 2 success');
-    res.json({ success: true, registrationId: wgResponse.data.registrationId });
+    res.json({ success: true, registrationId, accessLink });
   } catch (error) {
     console.error('❌ Step 2 error:', error.response?.status, error.response?.data || error.message);
     res.status(500).json({ 
