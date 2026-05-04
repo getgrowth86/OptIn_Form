@@ -49,54 +49,36 @@ app.post('/api/register-step1', async (req, res) => {
       return res.status(500).json({ success: false, message: 'Server not configured - missing AC credentials' });
     }
 
-    // Create/Update contact in Active Campaign
-    console.log('Creating contact in AC...');
-    const acResponse = await axios.post(
-      `${AC_API_URL}/api/3/contacts`,
-      {
-        contact: {
-          email: email,
-          firstName: '',
-          lastName: '',
-        },
-      },
-      {
-        headers: {
-          'Api-Token': AC_API_KEY,
-        },
-      }
-    );
-
-    const contactId = acResponse.data.contact.id;
-    console.log('Contact created:', contactId);
-
-    // Add contact to list
-    console.log('Adding to list...');
-    await axios.post(
-      `${AC_API_URL}/api/3/contactLists`,
-      {
-        contactList: {
-          list: AC_LIST_ID,
-          contact: contactId,
-          status: 1,
-        },
-      },
-      {
-        headers: {
-          'Api-Token': AC_API_KEY,
-        },
-      }
-    );
-
-    // Add tag
-    if (AC_TAG) {
-      console.log('Adding tag...');
-      await axios.post(
-        `${AC_API_URL}/api/3/contactTags`,
+    // First: Search if contact exists
+    console.log('Searching for existing contact...');
+    let contactId;
+    
+    try {
+      const searchResponse = await axios.get(
+        `${AC_API_URL}/api/3/contacts?email=${encodeURIComponent(email)}`,
         {
-          contactTag: {
-            tag: AC_TAG,
-            contact: contactId,
+          headers: {
+            'Api-Token': AC_API_KEY,
+          },
+        }
+      );
+
+      if (searchResponse.data.contacts && searchResponse.data.contacts.length > 0) {
+        contactId = searchResponse.data.contacts[0].id;
+        console.log('Contact found:', contactId);
+      } else {
+        throw new Error('Contact not found, will create');
+      }
+    } catch (searchError) {
+      // Contact doesn't exist, create new one
+      console.log('Creating new contact...');
+      const createResponse = await axios.post(
+        `${AC_API_URL}/api/3/contacts`,
+        {
+          contact: {
+            email: email,
+            firstName: '',
+            lastName: '',
           },
         },
         {
@@ -105,6 +87,54 @@ app.post('/api/register-step1', async (req, res) => {
           },
         }
       );
+      
+      contactId = createResponse.data.contact.id;
+      console.log('Contact created:', contactId);
+    }
+
+    // Add contact to list
+    console.log('Adding to list...');
+    try {
+      await axios.post(
+        `${AC_API_URL}/api/3/contactLists`,
+        {
+          contactList: {
+            list: AC_LIST_ID,
+            contact: contactId,
+            status: 1,
+          },
+        },
+        {
+          headers: {
+            'Api-Token': AC_API_KEY,
+          },
+        }
+      );
+    } catch (listError) {
+      console.log('List operation (may already be subscribed):', listError.response?.status);
+    }
+
+    // Add tag
+    if (AC_TAG) {
+      console.log('Adding tag...');
+      try {
+        await axios.post(
+          `${AC_API_URL}/api/3/contactTags`,
+          {
+            contactTag: {
+              tag: AC_TAG,
+              contact: contactId,
+            },
+          },
+          {
+            headers: {
+              'Api-Token': AC_API_KEY,
+            },
+          }
+        );
+      } catch (tagError) {
+        console.log('Tag operation (may already exist):', tagError.response?.status);
+      }
     }
 
     console.log('✓ Step 1 success');
