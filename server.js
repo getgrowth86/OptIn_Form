@@ -577,8 +577,6 @@ app.post('/api/register-complete', async (req, res) => {
       });
     }
 
-    const confirmationLink = wgResponse?.data.confirmation_link;
-    const watchLink = wgResponse?.data.watch_link;
     const accessLink = confirmationLink || watchLink || `https://webinars.webinargeek.com/watch/?subscription=${subscriptionId}`;
     
     // 🎯 TRACK IN META CONVERSIONS API
