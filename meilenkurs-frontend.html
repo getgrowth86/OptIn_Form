@@ -296,11 +296,43 @@
 
         async function submitForm() {
             try {
+                // 🎯 COLLECT DATA FROM INPUT FIELDS FIRST!
+                const firstname = document.getElementById('firstname').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                const countryValue = document.getElementById('country').value;
+                
+                console.log('📝 submitForm() - Collecting data from inputs:');
+                console.log('  firstname:', firstname);
+                console.log('  phone:', phone);
+                console.log('  countryValue:', countryValue);
+                
+                if (!firstname || !phone || !countryValue) {
+                    alert('Bitte alle Felder ausfüllen');
+                    return;
+                }
+                
+                // Split country value (e.g., "DE|+49" → "DE")
+                const [countryCode, prefix] = countryValue.split('|');
+                
+                // Update formData with collected data
+                formData.firstname = firstname;
+                formData.phone = phone;
+                formData.country = countryCode;
+                
+                console.log('✓ formData updated:', {
+                    email: formData.email,
+                    firstname: formData.firstname,
+                    phone: formData.phone,
+                    country: formData.country
+                });
+                
                 // 🎯 Vorbereitung: Gehashte Daten für Pixel
                 const emailHash = hashEmail(formData.email);
                 const phoneHash = hashPhone(formData.phone);
                 const fbc = getFBCookie();
 
+                console.log('📤 Sending to /api/register-complete...');
+                
                 const response = await fetch(`${API_URL}/api/register-complete`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -314,6 +346,8 @@
                 });
                 
                 const data = await response.json();
+                
+                console.log('📥 Response:', data);
                 
                 if (data.success) {
                     // 🎯 Track Lead Event in Meta Pixel (mit hashing & fbc)
@@ -329,7 +363,7 @@
                             country: formData.country,
                             fbc: fbc // Facebook Click ID
                         });
-                        console.log('✓ Meta Pixel Lead Event tracked (optimiert)');
+                        console.log('✓ Meta Pixel Lead Event tracked');
                     }
                     
                     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
@@ -340,9 +374,10 @@
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 } else {
                     alert('Fehler: ' + (data.message || 'Anmeldung fehlgeschlagen'));
+                    console.error('Error details:', data.details);
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('❌ Error:', error);
                 alert('Verbindungsfehler - versuche es später');
             }
         }
