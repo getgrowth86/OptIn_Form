@@ -524,17 +524,33 @@ app.post('/api/register-complete', async (req, res) => {
       
       console.log('\n🔑 API CONFIG:');
       console.log('  API-Key:', WG_API_KEY.substring(0, 10) + '...');
+      console.log('  Episode ID:', episodeId);
+      console.log('  Webinar ID:', webinarId);
       console.log('  Broadcast ID:', broadcastId);
-      console.log('  Endpoint:', `https://app.webinargeek.com/api/v2/broadcasts/${broadcastId}/subscriptions`);
+      console.log('  Endpoint (trying with Episode ID):', `https://app.webinargeek.com/api/v2/episodes/${episodeId}/subscriptions`);
       
-      const wgResponse = await axios.post(
-        `https://app.webinargeek.com/api/v2/broadcasts/${broadcastId}/subscriptions`,
-        wgPayload,
-        { 
+      // Try with Episode ID first (more flexible, doesn't have time constraints)
+      let wgResponse;
+      let endpoint;
+      
+      try {
+        endpoint = `https://app.webinargeek.com/api/v2/episodes/${episodeId}/subscriptions`;
+        console.log('\n📍 Attempting with Episode ID endpoint...');
+        wgResponse = await axios.post(endpoint, wgPayload, { 
           headers: { 'Api-Token': WG_API_KEY },
           timeout: 10000
-        }
-      );
+        });
+        console.log('✅ Episode ID endpoint worked!');
+      } catch (epError) {
+        // If Episode ID fails, try Broadcast ID as fallback
+        console.log('⚠️ Episode ID failed, trying Broadcast ID as fallback...');
+        endpoint = `https://app.webinargeek.com/api/v2/broadcasts/${broadcastId}/subscriptions`;
+        wgResponse = await axios.post(endpoint, wgPayload, { 
+          headers: { 'Api-Token': WG_API_KEY },
+          timeout: 10000
+        });
+        console.log('✅ Broadcast ID endpoint worked!');
+      }
 
       console.log('\n✅ SUCCESS!');
       console.log('Response Status:', wgResponse.status);
@@ -556,7 +572,6 @@ app.post('/api/register-complete', async (req, res) => {
       console.log('Message:', wgError.message);
       console.log('Config URL:', wgError.config?.url);
       console.log('Config Data:', wgError.config?.data);
-      console.log('Response Headers:', JSON.stringify(wgError.response?.headers, null, 2));
       console.log('Response Data:', JSON.stringify(wgError.response?.data, null, 2));
       
       return res.status(422).json({ 
@@ -567,7 +582,6 @@ app.post('/api/register-complete', async (req, res) => {
           statusText: wgError.response?.statusText,
           message: wgError.message,
           data: wgError.response?.data,
-          headers: wgError.response?.headers,
           config: {
             url: wgError.config?.url,
             method: wgError.config?.method,
