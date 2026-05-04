@@ -311,18 +311,34 @@ app.get('/api/health', (req, res) => {
 
 // Serve HTML on root
 app.get('/', (req, res) => {
-  // Read the HTML file from the same directory
   const fs = require('fs');
-  const htmlPath = __dirname + '/meilenkurs-frontend.html';
+  const path = require('path');
   
-  try {
-    const html = fs.readFileSync(htmlPath, 'utf8');
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.send(html);
-  } catch (err) {
-    console.error('Error serving HTML:', err);
-    res.status(500).send('Error loading form');
+  // Try different paths (for local dev vs Vercel)
+  const possiblePaths = [
+    path.join(__dirname, 'public', 'index.html'),
+    path.join(__dirname, '..', 'public', 'index.html'),
+    path.join(__dirname, 'meilenkurs-frontend.html')
+  ];
+  
+  let html;
+  for (const htmlPath of possiblePaths) {
+    try {
+      html = fs.readFileSync(htmlPath, 'utf8');
+      console.log('✓ HTML found at:', htmlPath);
+      break;
+    } catch (e) {
+      // Try next path
+    }
   }
+  
+  if (!html) {
+    console.error('❌ HTML file not found');
+    return res.status(500).send('Error: HTML file not found');
+  }
+  
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(html);
 });
 
 const PORT = process.env.PORT || 3000;
