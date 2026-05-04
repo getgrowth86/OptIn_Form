@@ -14,8 +14,8 @@ const AC_LIST_ID = process.env.AC_LIST_ID || '1';
 const AC_TAG = process.env.AC_TAG || 'MWV Evergreen angemeldet WG';
 
 const WG_API_KEY = process.env.WEBINARGEEK_API_KEY || '';
-const WG_EPISODE_ID = process.env.WEBINARGEEK_EPISODE_ID || '600918';
-const WG_BROADCAST_ID = process.env.WEBINARGEEK_BROADCAST_ID || '6161271';
+const WG_WEBINAR_ID = process.env.WEBINARGEEK_WEBINAR_ID || '459178';
+const WG_EPISODE_ID = process.env.WEBINARGEEK_EPISODE_ID || '489120';
 
 const CS_API_USER = process.env.CLICKSEND_API_USER || '';
 const CS_API_KEY = process.env.CLICKSEND_API_KEY || '';
@@ -178,7 +178,7 @@ app.post('/api/register-complete', async (req, res) => {
       });
     }
 
-    // ===== 2. WEBINARGEEK =====
+    // ===== 2. WEBINARGEEK (CRITICAL!) =====
     console.log('\n2️⃣ WEBINARGEEK');
     let subscriptionId;
     let watchLink = 'https://webinars.webinargeek.com';
@@ -191,35 +191,23 @@ app.post('/api/register-complete', async (req, res) => {
         country: country
       };
 
-      // Try Episode ID first
-      let wgRes;
-      try {
-        console.log('  Trying Episode ID endpoint...');
-        wgRes = await axios.post(
-          `https://app.webinargeek.com/api/v2/episodes/${WG_EPISODE_ID}/subscriptions`,
-          wgPayload,
-          { 
-            headers: { 'Api-Token': WG_API_KEY },
-            timeout: 10000
-          }
-        );
-      } catch (epErr) {
-        console.log('  Episode ID failed, trying Broadcast ID...');
-        wgRes = await axios.post(
-          `https://app.webinargeek.com/api/v2/broadcasts/${WG_BROADCAST_ID}/subscriptions`,
-          wgPayload,
-          { 
-            headers: { 'Api-Token': WG_API_KEY },
-            timeout: 10000
-          }
-        );
-      }
+      console.log('📍 Registering in Webinargeek...');
+      console.log('Episode ID:', WG_EPISODE_ID);
+      
+      const wgRes = await axios.post(
+        `https://app.webinargeek.com/api/v2/episodes/${WG_EPISODE_ID}/subscriptions`,
+        wgPayload,
+        { 
+          headers: { 'Api-Token': WG_API_KEY },
+          timeout: 10000
+        }
+      );
 
       subscriptionId = wgRes.data.id;
       watchLink = wgRes.data.watch_link || wgRes.data.confirmation_link || watchLink;
       console.log('✓ WG registered:', subscriptionId);
     } catch (wgErr) {
-      console.error('❌ WG Error:', wgErr.response?.data || wgErr.message);
+      console.error('❌ WG Error:', wgErr.response?.data?.errors?.[0]?.message || wgErr.message);
       return res.status(400).json({ 
         success: false, 
         message: 'Webinargeek error: ' + (wgErr.response?.data?.errors?.[0]?.message || wgErr.message)
