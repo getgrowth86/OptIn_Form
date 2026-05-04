@@ -18,16 +18,16 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 15px;
             color: #333;
         }
 
         .container {
             width: 100%;
-            max-width: 500px;
+            max-width: 100%;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             overflow: hidden;
             animation: slideUp 0.5s ease-out;
         }
@@ -35,7 +35,7 @@
         @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
@@ -45,27 +45,27 @@
 
         .header {
             background: linear-gradient(135deg, #ff9500 0%, #ff7500 100%);
-            padding: 40px 30px;
+            padding: 25px;
             text-align: center;
             color: white;
         }
 
         .header h1 {
-            font-size: 28px;
+            font-size: 18px;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .header p {
-            font-size: 14px;
+            font-size: 12px;
             opacity: 0.95;
-            line-height: 1.5;
+            line-height: 1.4;
         }
 
         .progress-bar {
-            height: 4px;
+            height: 3px;
             background: rgba(255, 255, 255, 0.3);
-            margin-top: 20px;
+            margin-top: 12px;
         }
 
         .progress-fill {
@@ -76,8 +76,7 @@
         }
 
         .content {
-            padding: 40px 30px;
-            min-height: 300px;
+            padding: 20px 25px;
         }
 
         .step {
@@ -90,57 +89,53 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .step-indicator {
-            font-size: 12px;
+            font-size: 11px;
             color: #ff9500;
             font-weight: 600;
             text-transform: uppercase;
-            margin-bottom: 15px;
-            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            letter-spacing: 0.3px;
         }
 
         .step h2 {
-            font-size: 22px;
-            margin-bottom: 10px;
+            font-size: 16px;
+            margin-bottom: 8px;
             color: #333;
         }
 
         .step-description {
-            font-size: 14px;
+            font-size: 12px;
             color: #666;
-            margin-bottom: 25px;
-            line-height: 1.5;
+            margin-bottom: 15px;
+            line-height: 1.4;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
 
         .form-group label {
             display: block;
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 600;
             color: #333;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.2px;
         }
 
         .form-group input,
         .form-group select {
             width: 100%;
-            padding: 12px 15px;
+            padding: 10px 12px;
             border: 2px solid #f0f0f0;
-            border-radius: 10px;
-            font-size: 15px;
+            border-radius: 8px;
+            font-size: 13px;
             transition: all 0.2s ease;
             font-family: inherit;
             color: #333;
@@ -160,8 +155,8 @@
 
         .error-message {
             color: #e74c3c;
-            font-size: 12px;
-            margin-top: 5px;
+            font-size: 11px;
+            margin-top: 4px;
             display: none;
         }
 
@@ -177,9 +172,9 @@
         .slot-selector {
             background: #fff9f5;
             border: 2px solid #ff9500;
-            border-radius: 12px;
-            padding: 15px;
-            margin: 15px 0;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 10px 0;
             cursor: pointer;
             transition: all 0.2s ease;
         }
@@ -196,33 +191,33 @@
         }
 
         .slot-time {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .slot-availability {
-            font-size: 12px;
+            font-size: 11px;
             opacity: 0.8;
         }
 
         .button-group {
             display: flex;
-            gap: 12px;
-            margin-top: 30px;
+            gap: 10px;
+            margin-top: 20px;
         }
 
         .btn {
             flex: 1;
-            padding: 14px 20px;
+            padding: 11px 16px;
             border: none;
-            border-radius: 10px;
-            font-size: 14px;
+            border-radius: 8px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.2px;
         }
 
         .btn-primary {
@@ -233,7 +228,7 @@
 
         .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(255, 149, 0, 0.3);
+            box-shadow: 0 8px 20px rgba(255, 149, 0, 0.3);
         }
 
         .btn-primary:disabled {
@@ -252,68 +247,62 @@
 
         .success-screen {
             text-align: center;
-            padding: 20px 0;
+            padding: 10px 0;
         }
 
         .success-icon {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             background: #ff9500;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 40px;
+            margin: 0 auto 15px;
+            font-size: 32px;
             color: white;
             animation: bounce 0.6s ease-out;
         }
 
         @keyframes bounce {
-            0% {
-                transform: scale(0.5);
-            }
-            70% {
-                transform: scale(1.1);
-            }
-            100% {
-                transform: scale(1);
-            }
+            0% { transform: scale(0.5); }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
         .success-message {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #333;
         }
 
         .success-subtext {
-            font-size: 14px;
+            font-size: 12px;
             color: #666;
-            margin-bottom: 20px;
-            line-height: 1.6;
+            margin-bottom: 15px;
+            line-height: 1.5;
         }
 
         .countdown-timer {
             background: #fff9f5;
             border: 2px solid #ff9500;
-            border-radius: 12px;
-            padding: 15px;
-            margin: 20px 0;
-            font-size: 13px;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 15px 0;
+            font-size: 11px;
             color: #666;
         }
 
         .countdown-timer strong {
             color: #ff9500;
-            font-size: 16px;
+            font-size: 14px;
         }
 
         .loading {
             display: none;
             text-align: center;
-            padding: 20px;
+            padding: 15px;
         }
 
         .loading.show {
@@ -321,13 +310,13 @@
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f0f0f0;
-            border-top: 4px solid #ff9500;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f0f0f0;
+            border-top: 3px solid #ff9500;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-            margin: 0 auto 15px;
+            margin: 0 auto 10px;
         }
 
         @keyframes spin {
@@ -337,13 +326,13 @@
 
         .info-box {
             background: #fff9f5;
-            border-left: 4px solid #ff9500;
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 13px;
+            border-left: 3px solid #ff9500;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 11px;
             color: #666;
-            line-height: 1.6;
+            line-height: 1.5;
         }
 
         @media (max-width: 600px) {
@@ -352,19 +341,19 @@
             }
 
             .header {
-                padding: 30px 20px;
+                padding: 20px;
             }
 
             .header h1 {
-                font-size: 22px;
+                font-size: 16px;
             }
 
             .content {
-                padding: 25px 20px;
+                padding: 18px 20px;
             }
 
             .step h2 {
-                font-size: 18px;
+                font-size: 14px;
             }
 
             .button-group {
@@ -381,7 +370,7 @@
     <div class="container">
         <div class="header">
             <h1>Meilenkurs 2.0</h1>
-            <p>Sichere deinen Platz für das Live-Webinar</p>
+            <p>Sichere deinen Platz</p>
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill"></div>
             </div>
@@ -390,13 +379,13 @@
         <div class="content">
             <div class="loading" id="loading">
                 <div class="spinner"></div>
-                <p>Wird verarbeitet...</p>
+                <p style="font-size: 12px;">Wird verarbeitet...</p>
             </div>
 
             <!-- STEP 1: EMAIL -->
             <div class="step active" id="step1">
                 <div class="step-indicator">Schritt 1 von 3</div>
-                <h2>Deine E-Mail-Adresse</h2>
+                <h2>Deine E-Mail</h2>
                 <p class="step-description">Damit wir dich zum Webinar einladen können</p>
                 
                 <form id="form1">
@@ -415,15 +404,15 @@
                 </form>
 
                 <div class="button-group">
-                    <button class="btn btn-primary" onclick="nextStep(1)">Weiter</button>
+                    <button class="btn btn-primary" onclick="nextStep(1)">Weiter →</button>
                 </div>
             </div>
 
             <!-- STEP 2: TERMIN -->
             <div class="step" id="step2">
                 <div class="step-indicator">Schritt 2 von 3</div>
-                <h2>Wähle deinen Wunsch-Termin</h2>
-                <p class="step-description">Der Workshop dauert ca. 90 Minuten</p>
+                <h2>Wähle deinen Termin</h2>
+                <p class="step-description">Sonntag 10:00 Uhr</p>
                 
                 <div id="slotContainer"></div>
 
@@ -436,8 +425,8 @@
             <!-- STEP 3: PERSÖNLICHE DATEN -->
             <div class="step" id="step3">
                 <div class="step-indicator">Schritt 3 von 3</div>
-                <h2>Fast geschafft!</h2>
-                <p class="step-description">Bitte vervollständige deine Angaben um dein kostenloses Ticket zu erhalten</p>
+                <h2>Fast fertig!</h2>
+                <p class="step-description">Vervollständige deine Angaben</p>
                 
                 <form id="form3">
                     <div class="form-group">
@@ -448,7 +437,6 @@
                             name="firstname" 
                             placeholder="Max" 
                             required
-                            autocomplete="given-name"
                         >
                         <div class="error-message" id="firstnameError"></div>
                     </div>
@@ -461,7 +449,6 @@
                             name="lastname" 
                             placeholder="Mustermann" 
                             required
-                            autocomplete="family-name"
                         >
                         <div class="error-message" id="lastnameError"></div>
                     </div>
@@ -474,19 +461,18 @@
                             name="phone" 
                             placeholder="+49 123 12345678" 
                             required
-                            autocomplete="tel"
                         >
                         <div class="error-message" id="phoneError"></div>
                     </div>
 
                     <div class="info-box">
-                        ℹ️ Zugangsscode kommt per SMS. Teilnahme nur mit korrekter Nummer möglich!
+                        ℹ️ Zuganscode kommt per SMS!
                     </div>
                 </form>
 
                 <div class="button-group">
                     <button class="btn btn-secondary" onclick="prevStep()">← Zurück</button>
-                    <button class="btn btn-primary" onclick="submitForm()">Kostenlos anmelden</button>
+                    <button class="btn btn-primary" onclick="submitForm()">Anmelden</button>
                 </div>
             </div>
 
@@ -494,20 +480,14 @@
             <div class="step" id="successStep">
                 <div class="success-screen">
                     <div class="success-icon">✓</div>
-                    <div class="success-message">Glückwunsch, du bist angemeldet!</div>
+                    <div class="success-message">Glückwunsch!</div>
                     <div class="success-subtext">
-                        Wichtig: In wenigen Augenblicken erhältst du eine E-Mail und SMS von uns mit deinem Zugangslink. Sollte nichts in deinem E-Mail Posteingang zu finden sein, prüfe bitte auch deinen Spam-Ordner.
+                        Du erhältst in Kürze eine E-Mail und SMS mit deinem Zugangslink.
                     </div>
 
                     <div class="countdown-timer">
-                        📅 <strong>Platz reserviert für: <span id="countdown">00:00</span></strong><br>
-                        Das Webinar startet pünktlich am:<br>
-                        <strong id="webinarTime"></strong>
-                    </div>
-
-                    <div class="success-subtext" style="margin-top: 20px; color: #999;">
-                        <strong>Persönliche Nachricht von Thorsten:</strong><br>
-                        Manuel, du gerade JA gesagt, mehr Freiheit, Geld und Gesundheit!
+                        📅 Platz reserviert für: <strong><span id="countdown">03:00</span></strong><br>
+                        <strong id="webinarTime" style="font-size: 12px;"></strong>
                     </div>
                 </div>
             </div>
@@ -515,8 +495,7 @@
     </div>
 
     <script>
-        // CONFIG
-        const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+        const API_URL = 'https://opt-in-form.vercel.app'; // ← Anpassen!
         const FORM_DATA = {
             email: '',
             selectedSlot: null,
@@ -527,7 +506,6 @@
 
         let countdownInterval;
 
-        // UTILITIES
         function updateProgress(step) {
             const progressFill = document.getElementById('progressFill');
             progressFill.style.width = (step / 3 * 100) + '%';
@@ -548,7 +526,6 @@
 
             if (currentStep === 1) {
                 FORM_DATA.email = document.getElementById('email').value;
-                // Call backend to register email
                 registerStep1();
             } else if (currentStep === 2) {
                 showStep(3);
@@ -567,11 +544,10 @@
             const email = document.getElementById('email').value;
             const emailError = document.getElementById('emailError');
             const emailGroup = document.getElementById('email').parentElement;
-
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
             if (!email || !emailRegex.test(email)) {
-                emailError.textContent = 'Bitte gib eine gültige E-Mail-Adresse ein';
+                emailError.textContent = 'Bitte gib eine gültige E-Mail ein';
                 emailError.classList.add('show');
                 emailGroup.classList.add('error');
                 return false;
@@ -594,25 +570,24 @@
             const firstname = document.getElementById('firstname').value;
             const lastname = document.getElementById('lastname').value;
             const phone = document.getElementById('phone').value;
-
             let valid = true;
 
             if (!firstname) {
-                document.getElementById('firstnameError').textContent = 'Vorname erforderlich';
+                document.getElementById('firstnameError').textContent = 'Erforderlich';
                 document.getElementById('firstnameError').classList.add('show');
                 document.getElementById('firstname').parentElement.classList.add('error');
                 valid = false;
             }
 
             if (!lastname) {
-                document.getElementById('lastnameError').textContent = 'Nachname erforderlich';
+                document.getElementById('lastnameError').textContent = 'Erforderlich';
                 document.getElementById('lastnameError').classList.add('show');
                 document.getElementById('lastname').parentElement.classList.add('error');
                 valid = false;
             }
 
             if (!phone || phone.length < 10) {
-                document.getElementById('phoneError').textContent = 'Bitte gib eine gültige Telefonnummer ein';
+                document.getElementById('phoneError').textContent = 'Bitte gültige Nummer';
                 document.getElementById('phoneError').classList.add('show');
                 document.getElementById('phone').parentElement.classList.add('error');
                 valid = false;
@@ -621,7 +596,6 @@
             return valid;
         }
 
-        // API CALLS
         async function registerStep1() {
             const loading = document.getElementById('loading');
             loading.classList.add('show');
@@ -636,19 +610,16 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Get next Sunday
                     const nextSlot = getNextSunday();
                     FORM_DATA.selectedSlot = nextSlot;
-                    
-                    // Show Step 2 with auto-selected slot
                     showStep(2);
                     renderSlots();
                 } else {
-                    alert('Fehler: ' + (data.message || 'Konnte nicht registriert werden'));
+                    alert('Fehler: ' + (data.message || 'Versuche es später'));
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Verbindungsfehler. Bitte versuche es später erneut.');
+                alert('Verbindungsfehler');
             } finally {
                 loading.classList.remove('show');
             }
@@ -680,13 +651,12 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Verbindungsfehler. Bitte versuche es später erneut.');
+                alert('Verbindungsfehler');
             } finally {
                 loading.classList.remove('show');
             }
         }
 
-        // UI HELPERS
         function getNextSunday() {
             const today = new Date();
             const nextSunday = new Date(today);
@@ -705,13 +675,11 @@
 
             container.innerHTML = `
                 <div class="slot-selector selected" onclick="selectSlot(this)">
-                    <div class="slot-time">📅 ${dateString}</div>
-                    <div class="slot-time">🕙 ${timeString} Uhr</div>
+                    <div class="slot-time">📅 ${dateString}, ${timeString} Uhr</div>
                     <div class="slot-availability">✓ Platz verfügbar</div>
                 </div>
             `;
 
-            // Auto-select the slot
             FORM_DATA.selectedSlot = slot;
             document.getElementById('step2Btn').disabled = false;
         }
@@ -730,8 +698,7 @@
             const dateTimeString = nextSunday.toLocaleDateString('de-DE', { 
                 weekday: 'long', 
                 day: '2-digit', 
-                month: 'long',
-                year: 'numeric'
+                month: 'long'
             }) + ' um ' + nextSunday.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
             
             document.getElementById('webinarTime').textContent = dateTimeString;
@@ -739,7 +706,7 @@
         }
 
         function startCountdown() {
-            let remainingSeconds = 180; // 3 minutes
+            let remainingSeconds = 180;
 
             function updateCountdown() {
                 const minutes = Math.floor(remainingSeconds / 60);
@@ -749,7 +716,6 @@
 
                 if (remainingSeconds <= 0) {
                     clearInterval(countdownInterval);
-                    document.getElementById('countdown').textContent = '00:00';
                 } else {
                     remainingSeconds--;
                 }
@@ -759,7 +725,6 @@
             countdownInterval = setInterval(updateCountdown, 1000);
         }
 
-        // INIT
         document.addEventListener('DOMContentLoaded', () => {
             showStep(1);
         });
