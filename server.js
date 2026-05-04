@@ -507,25 +507,52 @@ app.post('/api/register-complete', async (req, res) => {
     let subscriptionId;
     try {
       console.log('📍 Registering in Webinargeek...');
+      console.log('Broadcast ID:', broadcastId);
+      
+      // Build subscription payload
+      const wgPayload = {
+        firstname: firstname,
+        email: email,
+        phone: phone,
+        country: country,
+      };
+      
+      console.log('WG Subscription Payload:', wgPayload);
+      console.log('WG Endpoint:', `https://app.webinargeek.com/api/v2/broadcasts/${broadcastId}/subscriptions`);
+      
       const wgResponse = await axios.post(
         `https://app.webinargeek.com/api/v2/broadcasts/${broadcastId}/subscriptions`,
-        {
-          firstname: firstname,
-          email: email,
-          phone: phone,
-          country: country,
-        },
-        { headers: { 'Api-Token': WG_API_KEY } }
+        wgPayload,
+        { 
+          headers: { 'Api-Token': WG_API_KEY },
+          timeout: 10000
+        }
       );
 
       subscriptionId = wgResponse.data.id;
-      console.log('✓ Webinargeek registration successful, subscription ID:', subscriptionId);
+      console.log('✓ Webinargeek registration successful');
+      console.log('Subscription ID:', subscriptionId);
+      console.log('Response:', wgResponse.data);
     } catch (wgSubError) {
-      console.error('❌ Webinargeek subscription error:', wgSubError.response?.status, wgSubError.response?.data);
+      console.error('❌ Webinargeek subscription error:', wgSubError.response?.status);
+      console.error('Response data:', wgSubError.response?.data);
+      console.error('Response headers:', wgSubError.response?.headers);
+      console.error('Error message:', wgSubError.message);
+      
       return res.status(wgSubError.response?.status || 500).json({ 
         success: false, 
         message: 'Webinargeek subscription error: ' + (wgSubError.response?.data?.message || wgSubError.message),
-        details: wgSubError.response?.data
+        details: {
+          status: wgSubError.response?.status,
+          data: wgSubError.response?.data,
+          broadcastId: broadcastId,
+          payload: {
+            firstname: firstname,
+            email: email,
+            phone: phone,
+            country: country
+          }
+        }
       });
     }
 
