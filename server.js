@@ -284,49 +284,76 @@ app.post('/api/register-complete', async (req, res) => {
       }
     );
 
-    // Register in Webinargeek
-    console.log('Registering in Webinargeek...');
-    const wgResponse = await axios.post(
-      'https://api.webinargeek.com/registrations',
-      {
-        webinarId: WG_WEBINAR_ID,
-        episodeId: WG_EPISODE_ID,
-        firstName: firstname,
-        email: email,
-        phone: phone,
-        countryCode: country,
-      },
+    // Get broadcasts for episode first
+    console.log('Getting broadcasts for episode...');
+    const broadcastsResponse = await axios.get(
+      `https://app.webinargeek.com/api/v2/episodes/${WG_EPISODE_ID}`,
       {
         headers: {
-          'Authorization': `Bearer ${WG_API_KEY}`,
+          'Api-Token': WG_API_KEY,
         },
       }
     );
 
-    console.log('Webinargeek Response:', JSON.stringify(wgResponse.data));
-
-    const registrationId = wgResponse.data.registrationId;
-    // Try to get access link from Webinargeek response
-    const accessLink = wgResponse.data.accessLink || 
-                      wgResponse.data.registrationLink || 
-                      wgResponse.data.link ||
-                      wgResponse.data.webinarLink ||
-                      `https://webinar.thorstenkoch-defi.com/?access=${registrationId}`;
+    console.log('Episode data:', JSON.stringify(broadcastsResponse.data, null, 2));
     
-    console.log('Registration ID:', registrationId);
+    // Get broadcasts from episode
+    const broadcasts = broadcastsResponse.data.broadcasts || [];
+    if (!broadcasts || broadcasts.length === 0) {
+      throw new Error('No broadcasts found for episode');
+    }
+
+    // Use first available broadcast
+    const broadcast = broadcasts[0];
+    const broadcastId = broadcast.id;
+
+    console.log('Using broadcast ID:', broadcastId);
+
+    // Subscribe to broadcast
+    const wgResponse = await axios.post(
+      `https://app.webinargeek.com/api/v2/broadcasts/${broadcastId}/subscriptions`,
+      {
+        firstname: firstname,
+        email: email,
+        phone: phone,
+        country: country,
+      },
+      {
+        headers: {
+          'Api-Token': WG_API_KEY,
+        },
+      }
+    );
+
+    console.log('Webinargeek Response:', JSON.stringify(wgResponse.data, null, 2));
+
+    const subscriptionId = wgResponse.data.id;
+    // Get watch link from Webinargeek response
+    const accessLink = wgResponse.data.watch_link || 
+                      wgResponse.data.confirmation_link || 
+                      wgResponse.data.accessLink || 
+                      wgResponse.data.registrationLink || 
+                      `https://webinars.webinargeek.com/watch/?subscription=${subscriptionId}`;
+    
+    console.log('Subscription ID:', subscriptionId);
     console.log('Access Link:', accessLink);
     console.log('Sending SMS...');
 
     // Send SMS
-    await sendSMS(phone, country, firstname, registrationId, accessLink);
+    await sendSMS(phone, country, firstname, subscriptionId, accessLink);
 
     console.log('✓ Step 2 success');
-    res.json({ success: true, registrationId, accessLink });
+    res.json({ success: true, subscriptionId, accessLink });
   } catch (error) {
-    console.error('❌ Step 2 error:', error.response?.status, error.response?.data || error.message);
-    res.status(500).json({ 
+    console.error('❌ Step 2 error:');
+    console.error('Status:', error.response?.status);
+    console.error('Data:', JSON.stringify(error.response?.data, null, 2));
+    console.error('Message:', error.message);
+    
+    res.status(error.response?.status || 500).json({ 
       success: false, 
-      message: error.response?.data?.message || error.message || 'Registration failed'
+      message: error.response?.data?.message || error.message || 'Registration failed',
+      details: error.response?.data
     });
   }
 });
