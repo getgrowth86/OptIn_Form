@@ -17,6 +17,7 @@ const AC_TAG = process.env.AC_TAG;
 const WG_API_KEY = process.env.WEBINARGEEK_API_KEY;
 const WG_WEBINAR_ID = process.env.WEBINARGEEK_WEBINAR_ID;
 const WG_EPISODE_ID = process.env.WEBINARGEEK_EPISODE_ID;
+const WG_BROADCAST_ID = process.env.WEBINARGEEK_BROADCAST_ID;
 
 // Clicksend SMS
 const CLICKSEND_API_USER = process.env.CLICKSEND_API_USER;
@@ -285,7 +286,7 @@ app.post('/api/register-complete', async (req, res) => {
     );
 
     // Get webinar with broadcasts
-    console.log('Getting webinar with broadcasts...');
+    console.log('Getting webinar to find NEXT broadcast...');
     const webinarResponse = await axios.get(
       `https://app.webinargeek.com/api/v2/webinars/${WG_WEBINAR_ID}`,
       {
@@ -295,7 +296,7 @@ app.post('/api/register-complete', async (req, res) => {
       }
     );
 
-    console.log('Webinar data:', JSON.stringify(webinarResponse.data, null, 2));
+    console.log('Webinar data fetched');
     
     // Find the episode
     const episodes = webinarResponse.data.episodes || [];
@@ -305,7 +306,7 @@ app.post('/api/register-complete', async (req, res) => {
       throw new Error(`Episode ${WG_EPISODE_ID} not found in webinar ${WG_WEBINAR_ID}`);
     }
 
-    console.log('Episode found:', JSON.stringify(episode, null, 2));
+    console.log('Episode found with', episode.broadcasts?.length || 0, 'broadcasts');
 
     // Get broadcasts from episode
     const broadcasts = episode.broadcasts || [];
@@ -313,11 +314,14 @@ app.post('/api/register-complete', async (req, res) => {
       throw new Error('No broadcasts found for episode');
     }
 
-    // Use first available broadcast
-    const broadcast = broadcasts[0];
+    // Find NEXT (future) broadcast - or use most recent if all are past
+    const now = Math.floor(Date.now() / 1000); // Unix timestamp in seconds
+    const nextBroadcast = broadcasts.find(b => b.date > now);
+    const broadcast = nextBroadcast || broadcasts[0]; // Fallback to first if all past
     const broadcastId = broadcast.id;
-
-    console.log('Using broadcast ID:', broadcastId);
+    
+    const broadcastDate = new Date(broadcast.date * 1000).toLocaleString('de-DE');
+    console.log('Using broadcast ID:', broadcastId, '- Date:', broadcastDate);
 
     // Subscribe to broadcast
     const wgResponse = await axios.post(
