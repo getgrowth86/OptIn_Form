@@ -509,15 +509,20 @@ app.post('/api/register-complete', async (req, res) => {
       console.log('📍 Registering in Webinargeek...');
       console.log('Broadcast ID:', broadcastId);
       
-      // Build subscription payload
+      // Try different phone formats
+      // Remove leading + and 0s for cleaner format
+      let cleanPhone = phone.replace(/^\+/, '').replace(/^0+/, '');
+      
+      // Build subscription payload - TRY WITHOUT COUNTRY FIRST
       const wgPayload = {
         firstname: firstname,
         email: email,
-        phone: phone,
-        country: country,
+        phone: cleanPhone, // Try without + prefix and leading 0
       };
       
       console.log('WG Subscription Payload:', wgPayload);
+      console.log('Original phone:', phone);
+      console.log('Cleaned phone:', cleanPhone);
       console.log('WG Endpoint:', `https://app.webinargeek.com/api/v2/broadcasts/${broadcastId}/subscriptions`);
       
       const wgResponse = await axios.post(
@@ -532,28 +537,82 @@ app.post('/api/register-complete', async (req, res) => {
       subscriptionId = wgResponse.data.id;
       console.log('✓ Webinargeek registration successful');
       console.log('Subscription ID:', subscriptionId);
-      console.log('Response:', wgResponse.data);
+      console.log('Full Response:', wgResponse.data);
     } catch (wgSubError) {
       console.error('❌ Webinargeek subscription error:', wgSubError.response?.status);
-      console.error('Response data:', wgSubError.response?.data);
-      console.error('Response headers:', wgSubError.response?.headers);
       console.error('Error message:', wgSubError.message);
+      console.error('Response data:', JSON.stringify(wgSubError.response?.data, null, 2));
+      console.error('Response headers:', wgSubError.response?.headers);
       
-      return res.status(wgSubError.response?.status || 500).json({ 
-        success: false, 
-        message: 'Webinargeek subscription error: ' + (wgSubError.response?.data?.message || wgSubError.message),
-        details: {
-          status: wgSubError.response?.status,
-          data: wgSubError.response?.data,
-          broadcastId: broadcastId,
-          payload: {
+      // Try again WITH country if first attempt failed
+      if (wgSubError.response?.status === 422) {
+        console.log('📍 Retrying WITH country field...');
+        try {
+          const wgPayload2 = {
             firstname: firstname,
             email: email,
             phone: phone,
-            country: country
-          }
+            country: country,
+          };
+          
+          console.log('Retry payload:', wgPayload2);
+          
+          const wgResponse2 = await axios.post(
+            `https://app.webinargeek.com/api/v2/broadcasts/${broadcastId}/subscriptions`,
+            wgPayload2,
+            { 
+              headers: { 'Api-Token': WG_API_KEY },
+              timeout: 10000
+            }
+          );
+          
+          subscriptionId = wgResponse2.data.id;
+          console.log('✓ Retry successful!');
+        } catch (wgRetryError) {
+          console.error('❌ Retry also failed:', wgRetryError.response?.data);
+          return res.status(422).json({ 
+            success: false, 
+            message: 'Webinargeek subscription error (both attempts failed)',
+            details: {
+              attempt1: {
+                status: wgSubError.response?.status,
+                data: wgSubError.response?.data
+              },
+              attempt2: {
+                status: wgRetryError.response?.status,
+                data: wgRetryError.response?.data
+              },
+              payload1: {
+                firstname: firstname,
+                email: email,
+                phone: cleanPhone
+              },
+              payload2: {
+                firstname: firstname,
+                email: email,
+                phone: phone,
+                country: country
+              }
+            }
+          });
         }
-      });
+      } else {
+        return res.status(wgSubError.response?.status || 500).json({ 
+          success: false, 
+          message: 'Webinargeek subscription error: ' + (wgSubError.response?.data?.message || wgSubError.message),
+          details: {
+            status: wgSubError.response?.status,
+            data: wgSubError.response?.data,
+            broadcastId: broadcastId,
+            payload: {
+              firstname: firstname,
+              email: email,
+              phone: phone,
+              country: country
+            }
+          }
+        });
+      }
     }
 
     const confirmationLink = wgResponse?.data.confirmation_link;
