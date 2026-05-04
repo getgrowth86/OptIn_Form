@@ -4,10 +4,6 @@
     {
       "src": "server.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "meilenkurs-frontend.html",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -16,21 +12,8 @@
       "dest": "server.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "meilenkurs-frontend.html"
+      "src": "/.*",
+      "dest": "server.js"
     }
-  ],
-  "env": {
-    "WEBINARGEEK_API_KEY": "@webinargeek_api_key",
-    "WEBINARGEEK_WEBINAR_ID": "@webinargeek_webinar_id",
-    "WEBINARGEEK_EPISODE_ID": "@webinargeek_episode_id",
-    "AC_API_URL": "@ac_api_url",
-    "AC_API_KEY": "@ac_api_key",
-    "AC_LIST_ID": "@ac_list_id",
-    "AC_TAG": "@ac_tag",
-    "CLICKSEND_API_USER": "@clicksend_api_user",
-    "CLICKSEND_API_KEY": "@clicksend_api_key",
-    "CLICKSEND_SMS_FROM": "@clicksend_sms_from",
-    "NODE_ENV": "production"
-  }
+  ]
 }

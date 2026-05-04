@@ -12,6 +12,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Serve static files (Frontend)
+app.use(express.static('public'));
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/meilenkurs-frontend.html');
+});
+
 // CONFIG
 const PORT = process.env.PORT || 3001;
 
