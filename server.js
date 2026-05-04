@@ -284,10 +284,10 @@ app.post('/api/register-complete', async (req, res) => {
       }
     );
 
-    // Get broadcasts for episode first
-    console.log('Getting broadcasts for episode...');
-    const broadcastsResponse = await axios.get(
-      `https://app.webinargeek.com/api/v2/episodes/${WG_EPISODE_ID}`,
+    // Get webinar with broadcasts
+    console.log('Getting webinar with broadcasts...');
+    const webinarResponse = await axios.get(
+      `https://app.webinargeek.com/api/v2/webinars/${WG_WEBINAR_ID}`,
       {
         headers: {
           'Api-Token': WG_API_KEY,
@@ -295,10 +295,20 @@ app.post('/api/register-complete', async (req, res) => {
       }
     );
 
-    console.log('Episode data:', JSON.stringify(broadcastsResponse.data, null, 2));
+    console.log('Webinar data:', JSON.stringify(webinarResponse.data, null, 2));
     
+    // Find the episode
+    const episodes = webinarResponse.data.episodes || [];
+    const episode = episodes.find(ep => ep.id == WG_EPISODE_ID);
+    
+    if (!episode) {
+      throw new Error(`Episode ${WG_EPISODE_ID} not found in webinar ${WG_WEBINAR_ID}`);
+    }
+
+    console.log('Episode found:', JSON.stringify(episode, null, 2));
+
     // Get broadcasts from episode
-    const broadcasts = broadcastsResponse.data.broadcasts || [];
+    const broadcasts = episode.broadcasts || [];
     if (!broadcasts || broadcasts.length === 0) {
       throw new Error('No broadcasts found for episode');
     }

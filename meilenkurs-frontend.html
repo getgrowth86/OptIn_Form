@@ -140,16 +140,19 @@
                 // Step 2 → Success: Daten finalisieren
                 const firstname = document.getElementById('firstname').value.trim();
                 const phone = document.getElementById('phone').value.trim();
-                const country = document.getElementById('country').value;
+                const countryValue = document.getElementById('country').value;
                 
                 if (!firstname || !phone) {
                     alert('Bitte alle Felder ausfüllen');
                     return;
                 }
                 
+                // Split country value (e.g., "DE|+49" → "DE")
+                const [countryCode, prefix] = countryValue.split('|');
+                
                 formData.firstname = firstname;
                 formData.phone = phone;
-                formData.country = country;
+                formData.country = countryCode;
                 
                 await submitForm();
             } else {
