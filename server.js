@@ -7,14 +7,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// 🔑 ENV VARS
 const AC_API_URL = process.env.AC_API_URL || 'https://lunaswayfare.api-us1.com';
 const AC_API_KEY = process.env.AC_API_KEY || '';
 const AC_LIST_ID = process.env.AC_LIST_ID || '1';
 const AC_TAG = process.env.AC_TAG || 'MWV Evergreen angemeldet WG';
 
 const WG_API_KEY = process.env.WEBINARGEEK_API_KEY || '';
-const WG_WEBINAR_ID = process.env.WEBINARGEEK_WEBINAR_ID || '459178';
 const WG_EPISODE_ID = process.env.WEBINARGEEK_EPISODE_ID || '489120';
 
 const CS_API_USER = process.env.CLICKSEND_API_USER || '';
@@ -23,7 +21,6 @@ const CS_API_KEY = process.env.CLICKSEND_API_KEY || '';
 const META_ACCESS_TOKEN = process.env.META_ACCESS_TOKEN || '';
 const META_PIXEL_ID = '468972542963546';
 
-// 🧠 HELPER FUNCTIONS
 function hashEmail(email) {
   return crypto.createHash('sha256').update(email.toLowerCase()).digest('hex');
 }
@@ -33,175 +30,94 @@ function hashPhone(phone) {
   return crypto.createHash('sha256').update(cleaned).digest('hex');
 }
 
-// GET / - Serve HTML
 app.get('/', (req, res) => {
   const fs = require('fs');
-  const paths = [
-    './index.html',
-    './public/index.html',
-    '../public/index.html',
-    './meilenkurs-frontend.html'
-  ];
-  
+  const paths = ['./index.html', './public/index.html', '../public/index.html'];
   for (const path of paths) {
     try {
       const html = fs.readFileSync(path, 'utf8');
       return res.send(html);
     } catch (e) {}
   }
-  
   res.status(404).send('index.html not found');
 });
 
-// ===== STEP 1: EMAIL REGISTRATION =====
 app.post('/api/register-step1', async (req, res) => {
   try {
     const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, message: 'Email required' });
 
-    if (!email) {
-      return res.status(400).json({ success: false, message: 'Email required' });
-    }
-
-    console.log('\n📝 STEP 1 - EMAIL REGISTRATION');
-    console.log('Email:', email);
-
-    // Check if contact exists in AC
     let acContactId;
     try {
       const searchRes = await axios.get(`${AC_API_URL}/api/3/contacts`, {
         params: { email: email },
         headers: { 'Api-Token': AC_API_KEY }
       });
-
-      if (searchRes.data.contacts && searchRes.data.contacts.length > 0) {
+      if (searchRes.data.contacts?.length > 0) {
         acContactId = searchRes.data.contacts[0].id;
-        console.log('✓ Contact found in AC:', acContactId);
       }
-    } catch (searchErr) {
-      console.log('Contact not found, will create new');
-    }
+    } catch (e) {}
 
-    // Create or update contact
     let contact;
     if (acContactId) {
       const updateRes = await axios.put(
         `${AC_API_URL}/api/3/contacts/${acContactId}`,
-        {
-          contact: {
-            email: email,
-            listid: AC_LIST_ID
-          }
-        },
+        { contact: { email: email, listid: AC_LIST_ID } },
         { headers: { 'Api-Token': AC_API_KEY } }
       );
       contact = updateRes.data.contact;
-      console.log('✓ Contact updated in AC');
     } else {
       const createRes = await axios.post(
         `${AC_API_URL}/api/3/contacts`,
-        {
-          contact: {
-            email: email,
-            listid: AC_LIST_ID
-          }
-        },
+        { contact: { email: email, listid: AC_LIST_ID } },
         { headers: { 'Api-Token': AC_API_KEY } }
       );
       contact = createRes.data.contact;
-      console.log('✓ Contact created in AC:', contact.id);
     }
 
-    // Add tag
     try {
       await axios.post(
         `${AC_API_URL}/api/3/contactTags`,
-        {
-          contactTag: {
-            contact: contact.id,
-            tag: AC_TAG
-          }
-        },
+        { contactTag: { contact: contact.id, tag: AC_TAG } },
         { headers: { 'Api-Token': AC_API_KEY } }
       );
-      console.log('✓ Tag added');
-    } catch (tagErr) {
-      console.warn('⚠️ Tag error (non-blocking):', tagErr.message);
-    }
+    } catch (e) {}
 
     res.json({ success: true, contactId: contact.id });
-
   } catch (error) {
-    console.error('❌ Step 1 Error:', error.message);
-    res.status(500).json({ 
-      success: false, 
-      message: error.message || 'Step 1 failed'
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// ===== STEP 2: FULL REGISTRATION =====
 app.post('/api/register-complete', async (req, res) => {
   try {
     const { email, firstname, phone, country, fbc, fbclid } = req.body;
-
     if (!email || !firstname || !phone) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Missing required fields: email, firstname, phone' 
-      });
+      return res.status(400).json({ success: false, message: 'Missing fields' });
     }
 
-    console.log('\n📝 STEP 2 - COMPLETE REGISTRATION');
-    console.log('Email:', email);
-    console.log('Name:', firstname);
-    console.log('Phone:', phone);
+    // AC
+    const acSearchRes = await axios.get(`${AC_API_URL}/api/3/contacts`, {
+      params: { email: email },
+      headers: { 'Api-Token': AC_API_KEY }
+    });
 
-    // ===== 1. ACTIVECAMPAIGN =====
-    console.log('\n1️⃣ ACTIVECAMPAIGN');
-    try {
-      const acSearchRes = await axios.get(`${AC_API_URL}/api/3/contacts`, {
-        params: { email: email },
-        headers: { 'Api-Token': AC_API_KEY }
-      });
-
-      if (!acSearchRes.data.contacts || acSearchRes.data.contacts.length === 0) {
-        throw new Error('Contact not found in AC');
-      }
-
-      const acContactId = acSearchRes.data.contacts[0].id;
-
-      await axios.put(
-        `${AC_API_URL}/api/3/contacts/${acContactId}`,
-        {
-          contact: {
-            firstName: firstname,
-            phone: phone
-          }
-        },
-        { headers: { 'Api-Token': AC_API_KEY } }
-      );
-
-      console.log('✓ AC updated:', acContactId);
-    } catch (acErr) {
-      console.error('❌ AC Error:', acErr.message);
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Failed to update ActiveCampaign'
-      });
+    if (!acSearchRes.data.contacts?.length) {
+      return res.status(400).json({ success: false, message: 'Contact not found' });
     }
 
-    // ===== 2. WEBINARGEEK =====
-    console.log('\n2️⃣ WEBINARGEEK');
+    const acContactId = acSearchRes.data.contacts[0].id;
+    await axios.put(
+      `${AC_API_URL}/api/3/contacts/${acContactId}`,
+      { contact: { firstName: firstname, phone: phone } },
+      { headers: { 'Api-Token': AC_API_KEY } }
+    );
+
+    // WEBINARGEEK
     let subscriptionId;
     let watchLink = 'https://webinars.webinargeek.com';
 
-    const wgPayload = {
-      firstname: firstname,
-      email: email,
-      phone: phone,
-      country: country
-    };
-
+    const wgPayload = { firstname, email, phone, country };
     const endpoints = [
       `https://app.webinargeek.com/api/v2/episodes/${WG_EPISODE_ID}/subscriptions`,
       `https://app.webinargeek.com/api/v2/webinars/459178/episodes/${WG_EPISODE_ID}/subscriptions`,
@@ -211,50 +127,47 @@ app.post('/api/register-complete', async (req, res) => {
     let wgSuccess = false;
     for (const endpoint of endpoints) {
       try {
-        console.log(`📍 Trying: ${endpoint}`);
         const wgRes = await axios.post(endpoint, wgPayload, { 
           headers: { 'Api-Token': WG_API_KEY },
           timeout: 5000
         });
         
-        // 🔍 DEBUG: LOG COMPLETE RESPONSE
-        console.log('📦 Full WG Response:', JSON.stringify(wgRes.data, null, 2));
+        subscriptionId = wgRes.data.id || wgRes.data.subscription_id || '';
         
-        subscriptionId = wgRes.data.id || wgRes.data.subscription_id || 'success';
-        watchLink = wgRes.data.watch_link || wgRes.data.confirmation_link || watchLink;
+        // Try to get watch_link from response
+        watchLink = wgRes.data.watch_link || 
+                    wgRes.data.confirmation_link || 
+                    wgRes.data.join_url ||
+                    wgRes.data.access_link ||
+                    wgRes.data.registration_link ||
+                    wgRes.data.link;
         
-        console.log('✓ SUCCESS');
-        console.log('  - subscriptionId:', subscriptionId);
-        console.log('  - watchLink:', watchLink);
+        // If no link found, construct from subscription ID
+        if (!watchLink && subscriptionId) {
+          watchLink = `https://lunaswayfare.webinargeek.com/watch/${subscriptionId}/`;
+        }
+        
+        // Fallback
+        if (!watchLink) {
+          watchLink = 'https://webinars.webinargeek.com';
+        }
         wgSuccess = true;
         break;
-      } catch (err) {
-        console.log(`  ❌ Failed:`, err.message);
-      }
+      } catch (err) {}
     }
 
     if (!wgSuccess) {
-      console.error('❌ All WG endpoints failed');
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Webinargeek registration failed'
-      });
+      return res.status(400).json({ success: false, message: 'Webinargeek failed' });
     }
 
-    // ===== 3. CLICKSEND SMS =====
-    console.log('\n3️⃣ CLICKSEND SMS');
+    // SMS
     try {
       const smsMessage = `Hallo ${firstname}\n\nDu hast dich für den Workshop mit Meilenweitvoraus angemeldet.\n\nZugangsscope: ${subscriptionId}\n\n👇 Hier Dein Zugangslink (auch per Email):\n${watchLink}\n\nSonnige Grüße\nNatalie`;
       
       await axios.post(
         'https://rest.clicksend.com/v3/sms/send',
         {
-          messages: [
-            {
-              to: phone,
-              body: smsMessage
-            }
-          ]
+          messages: [{ to: phone, body: smsMessage }]
         },
         {
           auth: {
@@ -263,14 +176,9 @@ app.post('/api/register-complete', async (req, res) => {
           }
         }
       );
+    } catch (e) {}
 
-      console.log('✓ SMS sent');
-    } catch (smsErr) {
-      console.warn('⚠️ SMS Error (non-blocking):', smsErr.message);
-    }
-
-    // ===== 4. META PIXEL =====
-    console.log('\n4️⃣ META PIXEL');
+    // META PIXEL
     try {
       const emailHash = hashEmail(email);
       const phoneHash = hashPhone(phone);
@@ -295,36 +203,24 @@ app.post('/api/register-complete', async (req, res) => {
           access_token: META_ACCESS_TOKEN
         }
       );
+    } catch (e) {}
 
-      console.log('✓ Meta Pixel tracked');
-    } catch (metaErr) {
-      console.warn('⚠️ Meta Error (non-blocking):', metaErr.message);
-    }
-
-    // ===== SUCCESS =====
-    console.log('\n✅ ALL STEPS COMPLETE');
     res.json({ 
       success: true, 
       subscriptionId: subscriptionId,
-      watchLink: watchLink,
-      message: 'Registration successful!'
+      watchLink: watchLink
     });
 
   } catch (error) {
-    console.error('❌ Step 2 Error:', error.message);
-    res.status(500).json({ 
-      success: false, 
-      message: error.message || 'Registration failed'
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
