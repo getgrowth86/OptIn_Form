@@ -23,7 +23,7 @@ const CS_API_KEY = process.env.CLICKSEND_API_KEY || '';
 const META_ACCESS_TOKEN = process.env.META_ACCESS_TOKEN || '';
 const META_PIXEL_ID = '468972542963546';
 
-// 🧮 HELPER FUNCTIONS
+// 🧠 HELPER FUNCTIONS
 function hashEmail(email) {
   return crypto.createHash('sha256').update(email.toLowerCase()).digest('hex');
 }
@@ -32,6 +32,26 @@ function hashPhone(phone) {
   const cleaned = phone.replace(/\D/g, '');
   return crypto.createHash('sha256').update(cleaned).digest('hex');
 }
+
+// GET / - Serve HTML
+app.get('/', (req, res) => {
+  const fs = require('fs');
+  const paths = [
+    './index.html',
+    './public/index.html',
+    '../public/index.html',
+    './meilenkurs-frontend.html'
+  ];
+  
+  for (const path of paths) {
+    try {
+      const html = fs.readFileSync(path, 'utf8');
+      return res.send(html);
+    } catch (e) {}
+  }
+  
+  res.status(404).send('index.html not found');
+});
 
 // ===== STEP 1: EMAIL REGISTRATION =====
 app.post('/api/register-step1', async (req, res) => {
@@ -42,7 +62,7 @@ app.post('/api/register-step1', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email required' });
     }
 
-    console.log('\n📍 STEP 1 - EMAIL REGISTRATION');
+    console.log('\n📝 STEP 1 - EMAIL REGISTRATION');
     console.log('Email:', email);
 
     // Check if contact exists in AC
@@ -64,7 +84,6 @@ app.post('/api/register-step1', async (req, res) => {
     // Create or update contact
     let contact;
     if (acContactId) {
-      // Update existing
       const updateRes = await axios.put(
         `${AC_API_URL}/api/3/contacts/${acContactId}`,
         {
@@ -78,7 +97,6 @@ app.post('/api/register-step1', async (req, res) => {
       contact = updateRes.data.contact;
       console.log('✓ Contact updated in AC');
     } else {
-      // Create new
       const createRes = await axios.post(
         `${AC_API_URL}/api/3/contacts`,
         {
@@ -133,13 +151,13 @@ app.post('/api/register-complete', async (req, res) => {
       });
     }
 
-    console.log('\n📍 STEP 2 - COMPLETE REGISTRATION');
+    console.log('\n📝 STEP 2 - COMPLETE REGISTRATION');
     console.log('Email:', email);
     console.log('Name:', firstname);
     console.log('Phone:', phone);
     console.log('Country:', country);
 
-    // ===== 1. ACTIVECAMP AIGN =====
+    // ===== 1. ACTIVECAMPAIGN =====
     console.log('\n1️⃣ ACTIVECAMPAIGN');
     try {
       const acSearchRes = await axios.get(`${AC_API_URL}/api/3/contacts`, {
@@ -161,8 +179,8 @@ app.post('/api/register-complete', async (req, res) => {
             firstName: firstname,
             phone: phone,
             fieldValues: [
-              { field: '1', value: firstname }, // First name
-              { field: '2', value: phone }       // Phone
+              { field: '1', value: firstname },
+              { field: '2', value: phone }
             ]
           }
         },
@@ -227,7 +245,7 @@ app.post('/api/register-complete', async (req, res) => {
     // ===== 3. CLICKSEND SMS =====
     console.log('\n3️⃣ CLICKSEND SMS');
     try {
-      const smsMessage = `Hallo ${firstname}\nDu hast dich angemeldet!\nZugangslink: ${watchLink}`;
+      const smsMessage = `Hallo ${firstname}\n\nDu hast dich für den Workshop mit Meilenweitvoraus angemeldet.\n\nZugangsscope: ${subscriptionId}\n\n👇 Hier Dein Zugangslink (auch per Email):\n${watchLink}\n\nSonnige Grüße\nNatalie`;
       
       await axios.post(
         'https://rest.clicksend.com/v3/sms/send',
@@ -305,38 +323,6 @@ app.post('/api/register-complete', async (req, res) => {
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
-});
-
-// Serve HTML on root
-app.get('/', (req, res) => {
-  const fs = require('fs');
-  const path = require('path');
-  
-  // Try different paths (for local dev vs Vercel)
-  const possiblePaths = [
-    path.join(__dirname, 'public', 'index.html'),
-    path.join(__dirname, '..', 'public', 'index.html'),
-    path.join(__dirname, 'meilenkurs-frontend.html')
-  ];
-  
-  let html;
-  for (const htmlPath of possiblePaths) {
-    try {
-      html = fs.readFileSync(htmlPath, 'utf8');
-      console.log('✓ HTML found at:', htmlPath);
-      break;
-    } catch (e) {
-      // Try next path
-    }
-  }
-  
-  if (!html) {
-    console.error('❌ HTML file not found');
-    return res.status(500).send('Error: HTML file not found');
-  }
-  
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.send(html);
 });
 
 const PORT = process.env.PORT || 3000;
