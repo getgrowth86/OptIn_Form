@@ -4,6 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meilenkurs 2.0</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <!-- Meta Pixel Code -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '468972542963546');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=468972542963546&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Meta Pixel Code -->
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 12px; }
@@ -103,16 +124,98 @@
         let currentStep = 1;
         let countdownRunning = false;
 
-        function updateProgress() {
-            const progress = (currentStep / 2) * 100;
-            document.getElementById('progressFill').style.width = progress + '%';
+        const API_URL = window.location.origin;
+        let formData = { 
+            email: '', 
+            country: 'DE', 
+            prefix: '+49', 
+            firstname: '', 
+            phone: '', 
+            fbclid: '', 
+            fbc: '',
+            utm_source: '',
+            utm_medium: '',
+            utm_campaign: '',
+            utm_content: '',
+            utm_term: '',
+            referrer: '',
+            lead_source: '',
+            browser_fp: ''
+        };
+
+        // 🎯 Helper: SHA256 Hash (für Email/Phone)
+        function hashEmail(email) {
+            return CryptoJS.SHA256(email.toLowerCase().trim()).toString();
         }
 
-        const API_URL = window.location.origin;
-        let formData = { email: '', country: 'DE', prefix: '+49', firstname: '', phone: '' };
+        function hashPhone(phone) {
+            return CryptoJS.SHA256(phone.replace(/\D/g, '')).toString();
+        }
 
-        // Update prefix when country changes
+        // 🎯 Helper: Get FBC Cookie
+        function getFBCookie() {
+            const name = '_fbc=';
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const cookieArray = decodedCookie.split(';');
+            for (let cookie of cookieArray) {
+                cookie = cookie.trim();
+                if (cookie.indexOf(name) === 0) {
+                    return cookie.substring(name.length);
+                }
+            }
+            return formData.fbc;
+        }
+
+        // 🎯 Helper: Generate Browser Fingerprint
+        function generateBrowserFingerprint() {
+            const nav = navigator;
+            const screen_info = `${window.screen.width}x${window.screen.height}`;
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const fp = `${nav.userAgent}|${screen_info}|${timezone}`;
+            return CryptoJS.SHA256(fp).toString().substring(0, 16);
+        }
+
+        // 🎯 Helper: Detect Lead Source
+        function detectLeadSource(fbclid, utm_source, referrer) {
+            if (fbclid || utm_source === 'facebook') return 'paid';
+            if (utm_source === 'google' || referrer.includes('google.com')) return 'paid';
+            if (referrer) return 'referral';
+            return 'direct';
+        }
+
+        // 🎯 Init: Erfasse alle Tracking-Daten
         document.addEventListener('DOMContentLoaded', () => {
+            // Extract UTM Parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            formData.utm_source = urlParams.get('utm_source') || '';
+            formData.utm_medium = urlParams.get('utm_medium') || '';
+            formData.utm_campaign = urlParams.get('utm_campaign') || '';
+            formData.utm_content = urlParams.get('utm_content') || '';
+            formData.utm_term = urlParams.get('utm_term') || '';
+            formData.fbclid = urlParams.get('fbclid') || '';
+            
+            // Set fbc cookie if fbclid exists
+            if (formData.fbclid) {
+                const fbc = `fb.1.${Date.now()}.${formData.fbclid}`;
+                formData.fbc = fbc;
+                document.cookie = `_fbc=${fbc}; path=/; max-age=7776000`;
+                console.log('✓ fbclid & fbc set');
+            }
+
+            // Get referrer & browser fingerprint
+            formData.referrer = document.referrer || '';
+            formData.browser_fp = generateBrowserFingerprint();
+            
+            // Detect lead source
+            formData.lead_source = detectLeadSource(formData.fbclid, formData.utm_source, formData.referrer);
+
+            console.log('✓ Enterprise tracking data:', {
+                utm_source: formData.utm_source,
+                fbclid: !!formData.fbclid,
+                lead_source: formData.lead_source,
+                browser_fp: formData.browser_fp
+            });
+
             const countrySelect = document.getElementById('country');
             const phonePrefix = document.getElementById('phonePrefix');
             
@@ -193,15 +296,42 @@
 
         async function submitForm() {
             try {
+                // 🎯 Vorbereitung: Gehashte Daten für Pixel
+                const emailHash = hashEmail(formData.email);
+                const phoneHash = hashPhone(formData.phone);
+                const fbc = getFBCookie();
+
                 const response = await fetch(`${API_URL}/api/register-complete`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify({
+                        ...formData,
+                        emailHash,
+                        phoneHash,
+                        fbc,
+                        fbclid: formData.fbclid
+                    })
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
+                    // 🎯 Track Lead Event in Meta Pixel (mit hashing & fbc)
+                    if (typeof fbq !== 'undefined') {
+                        fbq('track', 'Lead', {
+                            value: 0,
+                            currency: 'EUR',
+                            content_name: 'Meilenkurs 2.0 Workshop',
+                            content_category: 'webinar',
+                            email: emailHash, // SHA256 Hash
+                            phone: phoneHash, // SHA256 Hash
+                            first_name: formData.firstname,
+                            country: formData.country,
+                            fbc: fbc // Facebook Click ID
+                        });
+                        console.log('✓ Meta Pixel Lead Event tracked (optimiert)');
+                    }
+                    
                     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
                     document.getElementById('success').classList.add('active');
                     currentStep = 3;
@@ -215,6 +345,11 @@
                 console.error('Error:', error);
                 alert('Verbindungsfehler - versuche es später');
             }
+        }
+
+        function updateProgress() {
+            const progress = (currentStep / 2) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
         }
 
         updateProgress();
