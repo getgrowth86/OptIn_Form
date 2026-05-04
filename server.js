@@ -292,6 +292,31 @@ app.post('/api/register-complete', async (req, res) => {
   }
 });
 
+// 🔍 DEBUG: Get available episodes/broadcasts
+app.get('/api/get-episodes', async (req, res) => {
+  try {
+    console.log('\n🔍 FETCHING AVAILABLE EPISODES...');
+    
+    const episodesRes = await axios.get(
+      `https://app.webinargeek.com/api/v2/webinars/${459178}/episodes`,
+      { headers: { 'Api-Token': WG_API_KEY }, timeout: 10000 }
+    );
+    
+    console.log('✅ Found episodes:', episodesRes.data);
+    res.json({ 
+      success: true, 
+      episodes: episodesRes.data 
+    });
+    
+  } catch (err) {
+    console.error('❌ Error fetching episodes:', err.message);
+    res.status(400).json({ 
+      success: false, 
+      error: err.response?.data || err.message 
+    });
+  }
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
