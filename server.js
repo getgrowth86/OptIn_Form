@@ -178,39 +178,49 @@ app.post('/api/register-complete', async (req, res) => {
       });
     }
 
-    // ===== 2. WEBINARGEEK (CRITICAL!) =====
+    // ===== 2. WEBINARGEEK =====
     console.log('\n2️⃣ WEBINARGEEK');
     let subscriptionId;
     let watchLink = 'https://webinars.webinargeek.com';
 
-    try {
-      const wgPayload = {
-        firstname: firstname,
-        email: email,
-        phone: phone,
-        country: country
-      };
+    const wgPayload = {
+      firstname: firstname,
+      email: email,
+      phone: phone,
+      country: country
+    };
 
-      console.log('📍 Registering in Webinargeek...');
-      console.log('Episode ID:', WG_EPISODE_ID);
-      
-      const wgRes = await axios.post(
-        `https://app.webinargeek.com/api/v2/episodes/${WG_EPISODE_ID}/subscriptions`,
-        wgPayload,
-        { 
+    // Try multiple endpoints
+    const endpoints = [
+      `https://app.webinargeek.com/api/v2/episodes/${WG_EPISODE_ID}/subscriptions`,
+      `https://app.webinargeek.com/api/v2/webinars/459178/episodes/${WG_EPISODE_ID}/subscriptions`,
+      `https://app.webinargeek.com/api/v2/webinars/459178/series_subscribe`
+    ];
+
+    let wgSuccess = false;
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`📍 Trying: ${endpoint}`);
+        const wgRes = await axios.post(endpoint, wgPayload, { 
           headers: { 'Api-Token': WG_API_KEY },
-          timeout: 10000
-        }
-      );
+          timeout: 5000
+        });
+        
+        subscriptionId = wgRes.data.id || wgRes.data.subscription_id || 'success';
+        watchLink = wgRes.data.watch_link || wgRes.data.confirmation_link || watchLink;
+        console.log('✓ SUCCESS at:', endpoint);
+        wgSuccess = true;
+        break;
+      } catch (err) {
+        console.log(`  ❌ Failed: ${err.response?.data?.message || err.message}`);
+      }
+    }
 
-      subscriptionId = wgRes.data.id;
-      watchLink = wgRes.data.watch_link || wgRes.data.confirmation_link || watchLink;
-      console.log('✓ WG registered:', subscriptionId);
-    } catch (wgErr) {
-      console.error('❌ WG Error:', wgErr.response?.data?.errors?.[0]?.message || wgErr.message);
+    if (!wgSuccess) {
+      console.error('❌ All WG endpoints failed');
       return res.status(400).json({ 
         success: false, 
-        message: 'Webinargeek error: ' + (wgErr.response?.data?.errors?.[0]?.message || wgErr.message)
+        message: 'Webinargeek registration failed - invalid episode'
       });
     }
 
@@ -288,31 +298,6 @@ app.post('/api/register-complete', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: error.message || 'Registration failed'
-    });
-  }
-});
-
-// 🔍 DEBUG: Get available episodes/broadcasts
-app.get('/api/get-episodes', async (req, res) => {
-  try {
-    console.log('\n🔍 FETCHING AVAILABLE EPISODES...');
-    
-    const episodesRes = await axios.get(
-      `https://app.webinargeek.com/api/v2/webinars/${459178}/episodes`,
-      { headers: { 'Api-Token': WG_API_KEY }, timeout: 10000 }
-    );
-    
-    console.log('✅ Found episodes:', episodesRes.data);
-    res.json({ 
-      success: true, 
-      episodes: episodesRes.data 
-    });
-    
-  } catch (err) {
-    console.error('❌ Error fetching episodes:', err.message);
-    res.status(400).json({ 
-      success: false, 
-      error: err.response?.data || err.message 
     });
   }
 });
