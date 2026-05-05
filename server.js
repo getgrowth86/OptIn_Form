@@ -233,22 +233,45 @@ app.get('/api/debug-wg', async (req, res) => {
     };
 
     console.log('\n🔍 DEBUG: Testing Webinargeek API');
-    const endpoint = `https://app.webinargeek.com/api/v2/webinars/459178/episodes/${WG_EPISODE_ID}/subscriptions`;
     
-    const wgRes = await axios.post(endpoint, testPayload, {
-      headers: { 'Api-Token': WG_API_KEY },
-      timeout: 5000
-    });
+    const endpoints = [
+      `https://app.webinargeek.com/api/v2/episodes/${WG_EPISODE_ID}/subscriptions`,
+      `https://app.webinargeek.com/api/v2/webinars/459178/episodes/${WG_EPISODE_ID}/subscriptions`,
+      `https://app.webinargeek.com/api/v2/webinars/459178/series_subscribe`
+    ];
 
-    res.json({
-      success: true,
-      fullResponse: wgRes.data,
-      allFields: Object.keys(wgRes.data)
-    });
+    let result = null;
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`📍 Trying: ${endpoint}`);
+        const wgRes = await axios.post(endpoint, testPayload, {
+          headers: { 'Api-Token': WG_API_KEY },
+          timeout: 5000
+        });
+        result = {
+          success: true,
+          workingEndpoint: endpoint,
+          fullResponse: wgRes.data,
+          allFields: Object.keys(wgRes.data)
+        };
+        break;
+      } catch (err) {
+        console.log(`  ❌ Failed`);
+      }
+    }
+
+    if (!result) {
+      result = {
+        success: false,
+        error: 'All endpoints failed'
+      };
+    }
+
+    res.json(result);
   } catch (err) {
     res.json({
       success: false,
-      error: err.response?.data || err.message
+      error: err.message
     });
   }
 });
