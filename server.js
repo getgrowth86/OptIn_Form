@@ -223,6 +223,36 @@ app.post('/api/register-complete', async (req, res) => {
   }
 });
 
+app.get('/api/debug-wg', async (req, res) => {
+  try {
+    const testPayload = {
+      firstname: 'DebugTest',
+      email: 'debug-' + Date.now() + '@test.com',
+      phone: '+49177999999',
+      country: 'DE'
+    };
+
+    console.log('\n🔍 DEBUG: Testing Webinargeek API');
+    const endpoint = `https://app.webinargeek.com/api/v2/webinars/459178/episodes/${WG_EPISODE_ID}/subscriptions`;
+    
+    const wgRes = await axios.post(endpoint, testPayload, {
+      headers: { 'Api-Token': WG_API_KEY },
+      timeout: 5000
+    });
+
+    res.json({
+      success: true,
+      fullResponse: wgRes.data,
+      allFields: Object.keys(wgRes.data)
+    });
+  } catch (err) {
+    res.json({
+      success: false,
+      error: err.response?.data || err.message
+    });
+  }
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
