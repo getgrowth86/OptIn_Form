@@ -132,27 +132,15 @@ app.post('/api/register-complete', async (req, res) => {
           timeout: 5000
         });
         
-        subscriptionId = wgRes.data.id || wgRes.data.subscription_id || '';
+        subscriptionId = wgRes.data.id || 
+                         wgRes.data.subscription_id || 
+                         (wgRes.data.subscriptions && wgRes.data.subscriptions[0] ? wgRes.data.subscriptions[0].id : '');
         
-        // Try to get watch_link or watch_token
-        let watchToken = wgRes.data.watch_token || 
-                         wgRes.data.access_token || 
-                         wgRes.data.url_token ||
-                         wgRes.data.registration_token ||
-                         wgRes.data.token;
-        
-        // Try full links first
+        // Try multiple structures
         watchLink = wgRes.data.watch_link || 
+                    (wgRes.data.subscriptions && wgRes.data.subscriptions[0] ? wgRes.data.subscriptions[0].watch_link : null) ||
                     wgRes.data.confirmation_link || 
-                    wgRes.data.join_url ||
-                    wgRes.data.access_link ||
-                    wgRes.data.registration_link ||
-                    wgRes.data.link;
-        
-        // If we have token but no link, construct it
-        if (!watchLink && watchToken) {
-          watchLink = `https://lunaswayfare.webinargeek.com/watch/${watchToken}/`;
-        }
+                    (wgRes.data.subscriptions && wgRes.data.subscriptions[0] ? wgRes.data.subscriptions[0].confirmation_link : null);
         
         // Fallback
         if (!watchLink) {
