@@ -152,7 +152,8 @@ app.post('/api/register-complete', async (req, res) => {
     }
 
     if (!wgSuccess) {
-      return res.status(400).json({ success: false, message: 'Webinargeek failed' });
+      console.warn('⚠️ Webinargeek failed, but continuing with SMS...');
+      watchLink = 'https://webinars.webinargeek.com';
     }
 
     // SMS
