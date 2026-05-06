@@ -13,7 +13,9 @@ const AC_LIST_ID = process.env.AC_LIST_ID || '1';
 const AC_TAG = process.env.AC_TAG || 'MWV Evergreen angemeldet WG';
 
 const WG_API_KEY = process.env.WEBINARGEEK_API_KEY || '';
-const WG_EPISODE_ID = process.env.WEBINARGEEK_EPISODE_ID || '489120';
+const WG_WEBINAR_ID = process.env.WEBINARGEEK_WEBINAR_ID || '565171';
+const WG_EPISODE_ID = process.env.WEBINARGEEK_EPISODE_ID || '600918';
+const WG_BROADCAST_ID = process.env.WEBINARGEEK_BROADCAST_ID || '6161271';
 
 const CS_API_USER = process.env.CLICKSEND_API_USER || '';
 const CS_API_KEY = process.env.CLICKSEND_API_KEY || '';
@@ -120,8 +122,9 @@ app.post('/api/register-complete', async (req, res) => {
     const wgPayload = { firstname, email, phone, country };
     const endpoints = [
       `https://app.webinargeek.com/api/v2/episodes/${WG_EPISODE_ID}/subscriptions`,
-      `https://app.webinargeek.com/api/v2/webinars/459178/episodes/${WG_EPISODE_ID}/subscriptions`,
-      `https://app.webinargeek.com/api/v2/webinars/459178/series_subscribe`
+      `https://app.webinargeek.com/api/v2/webinars/${WG_WEBINAR_ID}/episodes/${WG_EPISODE_ID}/subscriptions`,
+      `https://app.webinargeek.com/api/v2/broadcasts/${WG_BROADCAST_ID}/subscriptions`,
+      `https://app.webinargeek.com/api/v2/webinars/${WG_WEBINAR_ID}/series_subscribe`
     ];
 
     let wgSuccess = false;
@@ -136,13 +139,11 @@ app.post('/api/register-complete', async (req, res) => {
                          wgRes.data.subscription_id || 
                          (wgRes.data.subscriptions && wgRes.data.subscriptions[0] ? wgRes.data.subscriptions[0].id : '');
         
-        // Try multiple structures
         watchLink = wgRes.data.watch_link || 
                     (wgRes.data.subscriptions && wgRes.data.subscriptions[0] ? wgRes.data.subscriptions[0].watch_link : null) ||
                     wgRes.data.confirmation_link || 
                     (wgRes.data.subscriptions && wgRes.data.subscriptions[0] ? wgRes.data.subscriptions[0].confirmation_link : null);
         
-        // Fallback
         if (!watchLink) {
           watchLink = 'https://webinars.webinargeek.com';
         }
@@ -158,7 +159,7 @@ app.post('/api/register-complete', async (req, res) => {
 
     // SMS
     try {
-      const smsMessage = `Hallo ${firstname}\n\nDu hast dich für den Workshop mit Meilenweitvoraus angemeldet.\n\nZugangsscope: ${subscriptionId}\n\n👇 Hier Dein Zugangslink (auch per Email):\n${watchLink}\n\nSonnige Grüße\nNatalie`;
+      const smsMessage = `Hallo ${firstname}\n\nDu hast dich für den Workshop mit Meilenweitvoraus angemeldet.\n\nZugangscode: ${subscriptionId}\n\n👇 Hier Dein Zugangslink (auch per Email):\n${watchLink}\n\nSonnige Grüße\nNatalie`;
       
       await axios.post(
         'https://rest.clicksend.com/v3/sms/send',
@@ -221,18 +222,16 @@ app.get('/api/debug-wg', async (req, res) => {
       country: 'DE'
     };
 
-    console.log('\n🔍 DEBUG: Testing Webinargeek API');
-    
     const endpoints = [
       `https://app.webinargeek.com/api/v2/episodes/${WG_EPISODE_ID}/subscriptions`,
-      `https://app.webinargeek.com/api/v2/webinars/459178/episodes/${WG_EPISODE_ID}/subscriptions`,
-      `https://app.webinargeek.com/api/v2/webinars/459178/series_subscribe`
+      `https://app.webinargeek.com/api/v2/webinars/${WG_WEBINAR_ID}/episodes/${WG_EPISODE_ID}/subscriptions`,
+      `https://app.webinargeek.com/api/v2/broadcasts/${WG_BROADCAST_ID}/subscriptions`,
+      `https://app.webinargeek.com/api/v2/webinars/${WG_WEBINAR_ID}/series_subscribe`
     ];
 
     let result = null;
     for (const endpoint of endpoints) {
       try {
-        console.log(`📍 Trying: ${endpoint}`);
         const wgRes = await axios.post(endpoint, testPayload, {
           headers: { 'Api-Token': WG_API_KEY },
           timeout: 5000
@@ -244,24 +243,16 @@ app.get('/api/debug-wg', async (req, res) => {
           allFields: Object.keys(wgRes.data)
         };
         break;
-      } catch (err) {
-        console.log(`  ❌ Failed`);
-      }
+      } catch (err) {}
     }
 
     if (!result) {
-      result = {
-        success: false,
-        error: 'All endpoints failed'
-      };
+      result = { success: false, error: 'All endpoints failed' };
     }
 
     res.json(result);
   } catch (err) {
-    res.json({
-      success: false,
-      error: err.message
-    });
+    res.json({ success: false, error: err.message });
   }
 });
 
@@ -271,5 +262,5 @@ app.get('/api/health', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Legacy server listening...`);
 });
