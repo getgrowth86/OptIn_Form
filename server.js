@@ -124,21 +124,13 @@ app.post('/api/register-complete', async (req, res) => {
     let wgSuccess = false;
     try {
       const wgRes = await axios.post(
-        `https://app.webinargeek.com/api/v2/webinars/${WG_WEBINAR_ID}/subscribe`,
+        `https://app.webinargeek.com/api/v2/broadcasts/${WG_BROADCAST_ID}/subscriptions`,
         wgPayload,
         { headers: { 'Api-Token': WG_API_KEY }, timeout: 5000 }
       );
 
-      subscriptionId = wgRes.data.id ||
-                       wgRes.data.subscription_id ||
-                       (wgRes.data.subscriptions && wgRes.data.subscriptions[0] ? wgRes.data.subscriptions[0].id : '');
-
-      watchLink = wgRes.data.watch_link ||
-                  (wgRes.data.subscriptions && wgRes.data.subscriptions[0] ? wgRes.data.subscriptions[0].watch_link : null) ||
-                  wgRes.data.confirmation_link ||
-                  (wgRes.data.subscriptions && wgRes.data.subscriptions[0] ? wgRes.data.subscriptions[0].confirmation_link : null) ||
-                  'https://webinars.webinargeek.com';
-
+      subscriptionId = wgRes.data.id || '';
+      watchLink = wgRes.data.watch_link || wgRes.data.confirmation_link || 'https://webinars.webinargeek.com';
       wgSuccess = true;
     } catch (err) {
       console.warn('⚠️ Webinargeek failed:', err.message);
