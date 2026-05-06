@@ -120,40 +120,28 @@ app.post('/api/register-complete', async (req, res) => {
     let watchLink = 'https://webinars.webinargeek.com';
 
     const wgPayload = { firstname, email, phone, country };
-    const endpoints = [
-      `https://app.webinargeek.com/api/v2/episodes/${WG_EPISODE_ID}/subscriptions`,
-      `https://app.webinargeek.com/api/v2/webinars/${WG_WEBINAR_ID}/episodes/${WG_EPISODE_ID}/subscriptions`,
-      `https://app.webinargeek.com/api/v2/broadcasts/${WG_BROADCAST_ID}/subscriptions`,
-      `https://app.webinargeek.com/api/v2/webinars/${WG_WEBINAR_ID}/series_subscribe`
-    ];
 
     let wgSuccess = false;
-    for (const endpoint of endpoints) {
-      try {
-        const wgRes = await axios.post(endpoint, wgPayload, { 
-          headers: { 'Api-Token': WG_API_KEY },
-          timeout: 5000
-        });
-        
-        subscriptionId = wgRes.data.id || 
-                         wgRes.data.subscription_id || 
-                         (wgRes.data.subscriptions && wgRes.data.subscriptions[0] ? wgRes.data.subscriptions[0].id : '');
-        
-        watchLink = wgRes.data.watch_link || 
-                    (wgRes.data.subscriptions && wgRes.data.subscriptions[0] ? wgRes.data.subscriptions[0].watch_link : null) ||
-                    wgRes.data.confirmation_link || 
-                    (wgRes.data.subscriptions && wgRes.data.subscriptions[0] ? wgRes.data.subscriptions[0].confirmation_link : null);
-        
-        if (!watchLink) {
-          watchLink = 'https://webinars.webinargeek.com';
-        }
-        wgSuccess = true;
-        break;
-      } catch (err) {}
-    }
+    try {
+      const wgRes = await axios.post(
+        `https://app.webinargeek.com/api/v2/webinars/${WG_WEBINAR_ID}/subscribe`,
+        wgPayload,
+        { headers: { 'Api-Token': WG_API_KEY }, timeout: 5000 }
+      );
 
-    if (!wgSuccess) {
-      console.warn('⚠️ Webinargeek failed, but continuing with SMS...');
+      subscriptionId = wgRes.data.id ||
+                       wgRes.data.subscription_id ||
+                       (wgRes.data.subscriptions && wgRes.data.subscriptions[0] ? wgRes.data.subscriptions[0].id : '');
+
+      watchLink = wgRes.data.watch_link ||
+                  (wgRes.data.subscriptions && wgRes.data.subscriptions[0] ? wgRes.data.subscriptions[0].watch_link : null) ||
+                  wgRes.data.confirmation_link ||
+                  (wgRes.data.subscriptions && wgRes.data.subscriptions[0] ? wgRes.data.subscriptions[0].confirmation_link : null) ||
+                  'https://webinars.webinargeek.com';
+
+      wgSuccess = true;
+    } catch (err) {
+      console.warn('⚠️ Webinargeek failed:', err.message);
       watchLink = 'https://webinars.webinargeek.com';
     }
 
