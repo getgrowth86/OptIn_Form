@@ -1,0 +1,82 @@
+<!-- =========================================================
+  WEBINAR-OPTIN — Iframe-Embed für FunnelCockpit
+  Einfügen in: HTML-Code-Element
+
+  WICHTIG: Die Datei "optin-form.html" muss auf Vercel deployed sein,
+  z.B. unter https://meilenweitvoraus.vercel.app/
+  Pfad unten ggf. an deinen tatsächlichen Vercel-Projekt-Namen anpassen.
+  ========================================================= -->
+<style>
+  .wf-iframe-wrap {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .wf-iframe-wrap iframe {
+    width: 100%;
+    border: 0;
+    display: block;
+    background: transparent;
+    transition: none;
+  }
+  /* Wenn das Popup im iframe geöffnet wird, expandiert das iframe auf Vollbild */
+  .wf-iframe-wrap iframe.wf-fullscreen {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    z-index: 999999;
+  }
+</style>
+
+<div class="wf-iframe-wrap">
+  <iframe
+    id="wfFrame"
+    src="https://meilenweitvoraus.vercel.app/"
+    height="220"
+    scrolling="no"
+    allow="clipboard-write"
+    title="Webinar Anmeldung"
+  ></iframe>
+</div>
+
+<script>
+(function () {
+  var frame = document.getElementById('wfFrame');
+  if (!frame) return;
+
+  // Origin der iframe-Quelle ermitteln (für Security-Check)
+  var allowedOrigin;
+  try {
+    allowedOrigin = new URL(frame.src, window.location.href).origin;
+  } catch (e) {
+    allowedOrigin = null;
+  }
+
+  window.addEventListener('message', function (e) {
+    // Nur Events vom iframe-Host akzeptieren
+    if (allowedOrigin && e.origin !== allowedOrigin) return;
+    if (!e.data || typeof e.data !== 'object') return;
+
+    switch (e.data.type) {
+      case 'wf:popup-open':
+        frame.classList.add('wf-fullscreen');
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+        break;
+
+      case 'wf:popup-close':
+        frame.classList.remove('wf-fullscreen');
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+        break;
+
+      case 'wf:success':
+        // Optional: hier eigene Tracking-Pixel feuern
+        // z.B. fbq('track', 'Lead'); oder gtag('event', 'sign_up');
+        break;
+    }
+  });
+})();
+</script>
