@@ -13,9 +13,9 @@ const AC_LIST_ID = process.env.AC_LIST_ID || '1';
 const AC_TAG = process.env.AC_TAG || 'MWV Evergreen angemeldet WG';
 
 const WG_API_KEY = process.env.WEBINARGEEK_API_KEY || '';
-const WG_WEBINAR_ID = process.env.WEBINARGEEK_WEBINAR_ID || '565171';
-const WG_EPISODE_ID = process.env.WEBINARGEEK_EPISODE_ID || '600918';
-const WG_BROADCAST_ID = process.env.WEBINARGEEK_BROADCAST_ID || '6161271';
+const WG_WEBINAR_ID = process.env.WEBINARGEEK_WEBINAR_ID || '570529';
+const WG_EPISODE_ID = process.env.WEBINARGEEK_EPISODE_ID || '606387';
+const WG_BROADCAST_ID = process.env.WEBINARGEEK_BROADCAST_ID || '6243496';
 
 const CS_API_USER = process.env.CLICKSEND_API_USER || '';
 const CS_API_KEY = process.env.CLICKSEND_API_KEY || '';
