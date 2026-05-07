@@ -124,7 +124,7 @@ app.post('/api/register-complete', async (req, res) => {
     let wgSuccess = false;
     try {
       const wgRes = await axios.post(
-        `https://app.webinargeek.com/api/v2/episodes/${WG_EPISODE_ID}/subscriptions`,
+        `https://app.webinargeek.com/api/v2/broadcasts/${WG_BROADCAST_ID}/subscriptions`,
         wgPayload,
         { headers: { 'Api-Token': WG_API_KEY }, timeout: 5000 }
       );
