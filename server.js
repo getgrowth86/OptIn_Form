@@ -202,35 +202,52 @@ app.get('/api/debug-wg', async (req, res) => {
       country: 'DE'
     };
 
-    const endpoints = [
-      `https://app.webinargeek.com/api/v2/episodes/${WG_EPISODE_ID}/subscriptions`,
-      `https://app.webinargeek.com/api/v2/webinars/${WG_WEBINAR_ID}/episodes/${WG_EPISODE_ID}/subscriptions`,
-      `https://app.webinargeek.com/api/v2/broadcasts/${WG_BROADCAST_ID}/subscriptions`,
-      `https://app.webinargeek.com/api/v2/webinars/${WG_WEBINAR_ID}/series_subscribe`
-    ];
-
-    let result = null;
-    for (const endpoint of endpoints) {
-      try {
-        const wgRes = await axios.post(endpoint, testPayload, {
-          headers: { 'Api-Token': WG_API_KEY },
-          timeout: 5000
-        });
-        result = {
-          success: true,
-          workingEndpoint: endpoint,
-          fullResponse: wgRes.data,
-          allFields: Object.keys(wgRes.data)
-        };
-        break;
-      } catch (err) {}
+    // Schritt 1: Broadcasts der Episode abrufen
+    let broadcastsResult = null;
+    try {
+      const broadcastsRes = await axios.get(
+        `https://app.webinargeek.com/api/v2/episodes/${WG_EPISODE_ID}/broadcasts`,
+        { headers: { 'Api-Token': WG_API_KEY }, timeout: 5000 }
+      );
+      const now = Math.floor(Date.now() / 1000);
+      const broadcasts = broadcastsRes.data.broadcasts || broadcastsRes.data || [];
+      const upcoming = broadcasts
+        .filter(b => !b.cancelled && !b.has_ended)
+        .sort((a, b) => a.date - b.date);
+      const nextBroadcast = upcoming.find(b => b.date >= now) || upcoming[upcoming.length - 1];
+      broadcastsResult = {
+        totalBroadcasts: broadcasts.length,
+        upcomingBroadcasts: upcoming.length,
+        nextBroadcast: nextBroadcast ? { id: nextBroadcast.id, date: new Date(nextBroadcast.date * 1000).toISOString() } : null
+      };
+    } catch (err) {
+      broadcastsResult = { error: err.message };
     }
 
-    if (!result) {
-      result = { success: false, error: 'All endpoints failed' };
+    // Schritt 2: Direkt über Broadcast ID anmelden
+    let subscriptionResult = null;
+    try {
+      const wgRes = await axios.post(
+        `https://app.webinargeek.com/api/v2/broadcasts/${WG_BROADCAST_ID}/subscriptions`,
+        testPayload,
+        { headers: { 'Api-Token': WG_API_KEY }, timeout: 5000 }
+      );
+      subscriptionResult = {
+        success: true,
+        id: wgRes.data.id,
+        watch_link: wgRes.data.watch_link,
+        confirmation_link: wgRes.data.confirmation_link,
+        broadcast: wgRes.data.broadcast
+      };
+    } catch (err) {
+      subscriptionResult = { error: err.message };
     }
 
-    res.json(result);
+    res.json({
+      config: { WG_WEBINAR_ID, WG_EPISODE_ID, WG_BROADCAST_ID },
+      broadcasts: broadcastsResult,
+      subscription: subscriptionResult
+    });
   } catch (err) {
     res.json({ success: false, error: err.message });
   }
