@@ -118,6 +118,7 @@ app.post('/api/register-complete', async (req, res) => {
     // WEBINARGEEK
     let subscriptionId;
     let watchLink = 'https://webinars.webinargeek.com';
+    let confirmationLink = '';
 
     const wgPayload = { firstname, email, phone, country };
 
@@ -130,7 +131,7 @@ app.post('/api/register-complete', async (req, res) => {
       );
 
       subscriptionId = wgRes.data.id || '';
-      watchLink = wgRes.data.watch_link || wgRes.data.confirmation_link || 'https://webinars.webinargeek.com';
+      watchLink = wgRes.data.confirmation_link || wgRes.data.watch_link || 'https://webinars.webinargeek.com';
       wgSuccess = true;
     } catch (err) {
       console.warn('⚠️ Webinargeek failed:', err.message);
@@ -139,7 +140,8 @@ app.post('/api/register-complete', async (req, res) => {
 
     // SMS
     try {
-      const smsMessage = `Hallo ${firstname}\n\nDu hast dich für den Workshop mit Meilenweitvoraus angemeldet.\n\nZugangscode: ${subscriptionId}\n\n👇 Hier Dein Zugangslink (auch per Email):\n${watchLink}\n\nSonnige Grüße\nNatalie`;
+      const smsLink = confirmationLink || watchLink;
+      const smsMessage = `Hallo ${firstname}\n\nDu hast dich für den Workshop mit Meilenweitvoraus angemeldet.\n\n👇 Hier Dein persönlicher Zugangslink (auch per Email):\n${smsLink}\n\nSonnige Grüße\nNatalie`;
       
       await axios.post(
         'https://rest.clicksend.com/v3/sms/send',
